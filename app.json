@@ -1,0 +1,24 @@
+{
+  "expo": {
+    "name": "随机世界",
+    "slug": "random-world",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "myapp",
+    "userInterfaceStyle": "dark",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.randomworld.game"
+    },
+    "android": {
+      "package": "com.randomworld.game"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static"
+    },
+    "plugins": [
+      "expo-router"
+    ]
+  }
+}

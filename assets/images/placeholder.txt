@@ -1,0 +1,9 @@
+# 图片资源目录
+
+此目录用于存放应用的图片资源。
+
+如需添加图片，请参考以下命名规范：
+- icon.png - 应用图标
+- splash.png - 启动画面
+- adaptive-icon.png - Android 自适应图标
+- favicon.png - Web 图标
