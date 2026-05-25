@@ -1,21 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Text, TouchableOpacity, ScrollView, SafeAreaView, Modal, Pressable, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, Text, TouchableOpacity, SafeAreaView, Modal, Pressable, ActivityIndicator } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useGameStore } from '@/store/useGameStore';
-import SystemCard from '@/components/SystemCard';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import { getRaceById, RACES } from '@/utils/races';
 
-const systems = [
-  { id: 'dishes', name: '菜品', icon: 'restaurant', description: '收集食谱' },
-  { id: 'secrets', name: '秘术', icon: 'sparkles', description: '学习秘术' },
-  { id: 'beasts', name: '异兽', icon: 'paw', description: '驯养异兽' },
-  { id: 'weapons', name: '神兵', icon: 'shield', description: '打造神兵' },
-  { id: 'building', name: '修建', icon: 'construct', description: '建造建筑' },
-  { id: 'arrays', name: '阵界', icon: 'grid', description: '布置阵法' },
-  { id: 'empire', name: '皇朝', icon: 'crown', description: '建立皇朝' },
+// 左侧系统菜单
+const leftMenuItems = [
+  { id: 'materials', name: '材料', icon: 'nutrition' },
+  { id: 'essence', name: '精华', icon: 'flame' },
+  { id: 'dishes', name: '菜品', icon: 'restaurant' },
+  { id: 'secrets', name: '秘术', icon: 'sparkles' },
+  { id: 'beasts', name: '异兽', icon: 'paw' },
+  { id: 'weapons', name: '神兵', icon: 'shield' },
+  { id: 'building', name: '修建', icon: 'construct' },
+  { id: 'empire', name: '帝名', icon: 'crown' },
+];
+
+// 底部功能菜单
+const bottomMenuItems = [
+  { id: 'explore', name: '探索世界', icon: 'map', badge: '2/2' },
+  { id: 'race', name: '人族', icon: 'people', hasNotification: true },
+  { id: 'mother', name: '母神', icon: 'flower' },
+  { id: 'treasure', name: '宝物', icon: 'cube' },
+  { id: 'fate', name: '命运推演', icon: 'compass', badge: '第29次' },
 ];
 
 export default function HomeScreen() {
@@ -23,6 +33,8 @@ export default function HomeScreen() {
   const [showPopulationModal, setShowPopulationModal] = useState(false);
   const [showStrengthModal, setShowStrengthModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedMenu, setSelectedMenu] = useState<string | null>(null);
+  const [showSubMenu, setShowSubMenu] = useState(false);
 
   useEffect(() => {
     const initPlayer = async () => {
@@ -39,8 +51,21 @@ export default function HomeScreen() {
     router.push('/explore');
   };
 
-  const handleSystemPress = (systemId: string) => {
-    router.push(`/system/${systemId}`);
+  const handleLeftMenuPress = (itemId: string) => {
+    setSelectedMenu(itemId);
+    if (itemId === 'race') {
+      router.push(`/race/${player?.worldData.unlockedRaces[player.worldData.unlockedRaces.length - 1]}`);
+    } else if (['dishes', 'secrets', 'beasts', 'weapons', 'building', 'empire'].includes(itemId)) {
+      router.push(`/system/${itemId}`);
+    }
+  };
+
+  const handleBottomMenuPress = (itemId: string) => {
+    if (itemId === 'explore') {
+      handleStartExploration();
+    } else if (itemId === 'race' && player) {
+      router.push(`/race/${player.worldData.unlockedRaces[player.worldData.unlockedRaces.length - 1]}`);
+    }
   };
 
   if (isLoading || !player) {
@@ -98,69 +123,198 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <View style={styles.avatarContainer}>
-            <Ionicons name="person" size={24} color={Colors.accent} />
-          </View>
-          <View style={styles.headerTextContainer}>
-            <Text style={styles.welcomeText}>欢迎回来</Text>
-            <Text style={styles.playerName}>{player.name}</Text>
-          </View>
-        </View>
-        <TouchableOpacity style={styles.settingsButton}>
-          <View style={styles.settingsIconContainer}>
-            <Ionicons name="settings-outline" size={22} color={Colors.text} />
-          </View>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.subtitleContainer}>
-        <Text style={styles.subtitle}>引导你的种族走向繁荣</Text>
-        <View style={styles.subtitleDecoration}>
-          <Ionicons name="sparkles" size={16} color={Colors.accent} />
-        </View>
-      </View>
-
+      {/* 背景层 */}
+      <View style={styles.backgroundLayer} />
+      
+      {/* 顶部横向资源栏 */}
       <View style={styles.topBar}>
-        <TouchableOpacity style={styles.topBarItem} onPress={() => setShowPopulationModal(true)}>
-          <View style={styles.topBarIconContainer}>
-            <Ionicons name="people" size={18} color={Colors.accent} />
+        <TouchableOpacity style={styles.topBarItem}>
+          <View style={[styles.topBarIcon, { backgroundColor: '#8D6E63' }]}>
+            <Ionicons name="cube" size={18} color="#FFFFFF" />
           </View>
           <View style={styles.topBarInfo}>
-            <Text style={styles.topBarValue}>{totalPopulation.toLocaleString()}</Text>
+            <Text style={styles.topBarValue}>{player.worldData.resources?.stone || 0}</Text>
+            <Text style={styles.topBarLabel}>石头</Text>
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.topBarItem}>
+          <View style={[styles.topBarIcon, { backgroundColor: '#795548' }]}>
+            <Ionicons name="leaf" size={18} color="#FFFFFF" />
+          </View>
+          <View style={styles.topBarInfo}>
+            <Text style={styles.topBarValue}>{player.worldData.resources?.wood || 0}</Text>
+            <Text style={styles.topBarLabel}>木材</Text>
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.topBarItem}>
+          <View style={[styles.topBarIcon, { backgroundColor: '#4CAF50' }]}>
+            <Ionicons name="flask" size={18} color="#FFFFFF" />
+          </View>
+          <View style={styles.topBarInfo}>
+            <Text style={styles.topBarValue}>0</Text>
+            <Text style={styles.topBarLabel}>草药</Text>
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.topBarItem}>
+          <View style={[styles.topBarIcon, { backgroundColor: '#2196F3' }]}>
+            <Ionicons name="water" size={18} color="#FFFFFF" />
+          </View>
+          <View style={styles.topBarInfo}>
+            <Text style={styles.topBarValue}>{player.worldData.resources?.water || 0}</Text>
+            <Text style={styles.topBarLabel}>水</Text>
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.topBarItem}>
+          <View style={[styles.topBarIcon, { backgroundColor: '#FF9800' }]}>
+            <Ionicons name="restaurant" size={18} color="#FFFFFF" />
+          </View>
+          <View style={styles.topBarInfo}>
+            <Text style={styles.topBarValue}>{player.worldData.resources?.food || 0}</Text>
+            <Text style={styles.topBarLabel}>食物</Text>
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.topBarItem} onPress={() => setShowPopulationModal(true)}>
+          <View style={[styles.topBarIcon, { backgroundColor: '#9C27B0' }]}>
+            <Ionicons name="people" size={18} color="#FFFFFF" />
+          </View>
+          <View style={styles.topBarInfo}>
+            <Text style={styles.topBarValue}>{totalPopulation}</Text>
             <Text style={styles.topBarLabel}>人口</Text>
           </View>
         </TouchableOpacity>
-        
-        <View style={styles.topBarDivider} />
-        
+
         <TouchableOpacity style={styles.topBarItem} onPress={() => setShowStrengthModal(true)}>
-          <View style={styles.topBarIconContainer}>
-            <Ionicons name="shield-checkmark" size={18} color={Colors.accent} />
+          <View style={[styles.topBarIcon, { backgroundColor: '#F44336' }]}>
+            <Ionicons name="shield" size={18} color="#FFFFFF" />
           </View>
           <View style={styles.topBarInfo}>
-            <Text style={styles.topBarValue}>{totalStrength.toLocaleString()}</Text>
+            <Text style={styles.topBarValue}>{totalStrength}</Text>
             <Text style={styles.topBarLabel}>战力</Text>
           </View>
         </TouchableOpacity>
-        
-        <View style={styles.topBarDivider} />
-        
-        <View style={styles.topBarResources}>
-          {Object.entries(player.worldData.resources ?? {}).map(([key, value]) => (
-            <View key={key} style={styles.topBarResourceItem}>
-              <Ionicons 
-                name={key === 'food' ? 'restaurant' : key === 'water' ? 'water' : key === 'wood' ? 'leaf' : 'cube'} 
-                size={14} 
-                color={Colors.accent} 
-              />
-              <Text style={styles.topBarResourceValue}>{value.toLocaleString()}</Text>
-            </View>
-          ))}
+
+        {/* 快捷按钮 */}
+        <View style={styles.topBarQuickButtons}>
+          <TouchableOpacity style={styles.topBarQuickButton}>
+            <Ionicons name="settings-outline" size={20} color={Colors.text} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.topBarQuickButton}>
+            <Ionicons name="mail-outline" size={20} color={Colors.text} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.topBarQuickButton}>
+            <Ionicons name="book-outline" size={20} color={Colors.text} />
+          </TouchableOpacity>
         </View>
       </View>
 
+      {/* 主内容区域 */}
+      <View style={styles.mainContent}>
+        {/* 左侧菜单 */}
+        <View style={styles.leftMenu}>
+          {/* 子菜单 - 点击志录后显示 */}
+          {showSubMenu && (
+            <View style={styles.subMenuContainer}>
+              {leftMenuItems.map((item, index) => (
+                <TouchableOpacity
+                  key={item.id}
+                  style={[styles.subMenuItem, selectedMenu === item.id && styles.subMenuItemSelected]}
+                  onPress={() => handleLeftMenuPress(item.id)}
+                >
+                  <Ionicons name={item.icon as any} size={18} color={selectedMenu === item.id ? Colors.primaryDark : Colors.accent} />
+                  <Text style={[styles.subMenuText, selectedMenu === item.id && styles.subMenuTextSelected]}>
+                    {item.name}
+                  </Text>
+                  {(item.id === 'materials' || item.id === 'weapons' || item.id === 'building') && (
+                    <View style={styles.subMenuNotification} />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+          
+          {/* 从下到上的主按钮 */}
+          <View style={styles.leftButtonsContainer}>
+            {/* 副本按钮 */}
+            <TouchableOpacity style={styles.leftButton}>
+              <View style={styles.leftButtonIcon}>
+                <Ionicons name="game-controller" size={24} color={Colors.text} />
+              </View>
+              <Text style={styles.leftButtonText}>副本</Text>
+            </TouchableOpacity>
+            
+            {/* 种族按钮 */}
+            <TouchableOpacity 
+              style={styles.leftButton} 
+              onPress={() => router.push(`/race/${player.worldData.unlockedRaces[player.worldData.unlockedRaces.length - 1]}`)}
+            >
+              <View style={styles.leftButtonIcon}>
+                <Ionicons name="people" size={24} color={Colors.text} />
+              </View>
+              <Text style={styles.leftButtonText}>种族</Text>
+              <View style={styles.leftButtonNotification} />
+            </TouchableOpacity>
+            
+            {/* 志录按钮 */}
+            <TouchableOpacity 
+              style={styles.leftButton} 
+              onPress={() => setShowSubMenu(!showSubMenu)}
+            >
+              <View style={styles.leftButtonIcon}>
+                <Ionicons name="book" size={24} color={Colors.text} />
+              </View>
+              <Text style={styles.leftButtonText}>志录</Text>
+              <View style={styles.leftButtonNotification} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* 中央区域 */}
+        <View style={styles.centerArea}>
+          {/* 地图/场景区域 */}
+          <View style={styles.mapArea}>
+            <View style={styles.mapPlaceholder}>
+              <Text style={styles.mapPlaceholderText}>世界地图</Text>
+            </View>
+          </View>
+          
+          {/* 右下角一键收集 */}
+          <View style={styles.collectButtonArea}>
+            <TouchableOpacity style={styles.collectButton}>
+              <Text style={styles.collectButtonText}>一键收集</Text>
+            </TouchableOpacity>
+            <Text style={styles.collectInfo}>剩余0次</Text>
+          </View>
+        </View>
+      </View>
+
+      {/* 底部菜单 */}
+      <View style={styles.bottomMenu}>
+        {bottomMenuItems.map((item) => (
+          <TouchableOpacity
+            key={item.id}
+            style={styles.bottomMenuItem}
+            onPress={() => handleBottomMenuPress(item.id)}
+          >
+            <View style={styles.bottomMenuIcon}>
+              <Ionicons name={item.icon as any} size={28} color={Colors.accent} />
+            </View>
+            {item.badge && (
+              <Text style={styles.bottomMenuBadge}>{item.badge}</Text>
+            )}
+            <Text style={styles.bottomMenuText}>{item.name}</Text>
+            {item.hasNotification && (
+              <View style={styles.bottomNotification} />
+            )}
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      {/* 人口模态框 */}
       <Modal
         visible={showPopulationModal}
         transparent={true}
@@ -179,20 +333,18 @@ export default function HomeScreen() {
               <Text style={styles.totalPopulationLabel}>总人口</Text>
               <Text style={styles.totalPopulationValue}>{totalPopulation}</Text>
             </View>
-            <ScrollView style={styles.raceList}>
+            <View style={styles.modalList}>
               {allRaces.map((race) => (
-                <View key={race.id} style={styles.raceItem}>
-                  <View style={styles.raceInfo}>
-                    <View style={styles.raceHeader}>
-                      <Text style={styles.raceName}>{race.name}</Text>
-                      <View style={styles.tierBadge}>
-                        <Text style={styles.tierText}>T{race.tier}</Text>
-                      </View>
+                <View key={race.id} style={styles.modalListItem}>
+                  <View style={styles.modalListItemInfo}>
+                    <Text style={styles.modalListItemName}>{race.name}</Text>
+                    <View style={styles.tierBadge}>
+                      <Text style={styles.tierText}>T{race.tier}</Text>
                     </View>
                   </View>
-                  <View style={styles.raceCountContainer}>
-                    <Text style={styles.raceCount}>{race.population}</Text>
-                    <Text style={styles.raceCountLabel}>人</Text>
+                  <View style={styles.modalListItemValue}>
+                    <Text style={styles.modalListItemNumber}>{race.population}</Text>
+                    <Text style={styles.modalListItemUnit}>人</Text>
                   </View>
                 </View>
               ))}
@@ -203,28 +355,29 @@ export default function HomeScreen() {
                     <Text style={styles.tribesSectionTitle}>附属部落</Text>
                   </View>
                   {(player.worldData.unlockedTribes ?? []).map((tribe, index) => (
-                    <View key={tribe.id || index} style={styles.tribeItem}>
-                      <View style={styles.tribeInfo}>
-                        <Text style={styles.tribeName}>{tribe.name}</Text>
+                    <View key={tribe.id || index} style={styles.modalListItem}>
+                      <View style={styles.modalListItemInfo}>
+                        <Text style={styles.modalListItemName}>{tribe.name}</Text>
                         <View style={styles.tribeStatusBadge}>
                           <Text style={styles.tribeStatusText}>
                             {tribe.status === 'merged' ? '合并' : tribe.status === 'vassal' ? '附庸' : '敌对'}
                           </Text>
                         </View>
                       </View>
-                      <View style={styles.tribePopulationContainer}>
-                        <Text style={styles.tribePopulation}>{tribe.population}</Text>
-                        <Text style={styles.tribePopulationLabel}>人</Text>
+                      <View style={styles.modalListItemValue}>
+                        <Text style={styles.modalListItemNumber}>{tribe.population}</Text>
+                        <Text style={styles.modalListItemUnit}>人</Text>
                       </View>
                     </View>
                   ))}
                 </View>
               )}
-            </ScrollView>
+            </View>
           </Pressable>
         </Pressable>
       </Modal>
 
+      {/* 战力模态框 */}
       <Modal
         visible={showStrengthModal}
         transparent={true}
@@ -243,17 +396,15 @@ export default function HomeScreen() {
               <Text style={styles.totalPopulationLabel}>总战力</Text>
               <Text style={styles.totalPopulationValue}>{totalStrength}</Text>
             </View>
-            <ScrollView style={styles.raceList}>
+            <View style={styles.modalList}>
               {getAllRacesWithStrength().map((race) => {
                 const raceInfo = RACES[race.id];
                 return (
-                  <View key={race.id} style={styles.strengthItem}>
-                    <View style={styles.strengthInfo}>
-                      <View style={styles.raceHeader}>
-                        <Text style={styles.raceName}>{race.name}</Text>
-                        <View style={styles.tierBadge}>
-                          <Text style={styles.tierText}>T{race.tier}</Text>
-                        </View>
+                  <View key={race.id} style={styles.modalListItem}>
+                    <View style={styles.modalListItemInfo}>
+                      <Text style={styles.modalListItemName}>{race.name}</Text>
+                      <View style={styles.tierBadge}>
+                        <Text style={styles.tierText}>T{race.tier}</Text>
                       </View>
                       <View style={styles.strengthBreakdown}>
                         <Text style={styles.strengthBreakdownText}>
@@ -265,77 +416,17 @@ export default function HomeScreen() {
                         </Text>
                       </View>
                     </View>
-                    <View style={styles.strengthValueContainer}>
-                      <Text style={styles.strengthValue}>{race.strength}</Text>
-                      <Text style={styles.strengthValueLabel}>战力</Text>
+                    <View style={styles.modalListItemValue}>
+                      <Text style={styles.modalListItemNumber}>{race.strength}</Text>
+                      <Text style={styles.modalListItemUnit}>战力</Text>
                     </View>
                   </View>
                 );
               })}
-            </ScrollView>
+            </View>
           </Pressable>
         </Pressable>
       </Modal>
-
-      <ScrollView style={styles.content}>
-        <View style={styles.raceSection}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>当前种族</Text>
-            <View style={styles.sectionDecoration} />
-          </View>
-          <TouchableOpacity 
-            style={styles.raceCard}
-            onPress={() => router.push(`/race/${player.worldData.unlockedRaces[player.worldData.unlockedRaces.length - 1]}`)}
-          >
-            <View style={styles.raceCardHeader}>
-              <View style={styles.raceIconContainer}>
-                <Ionicons name="people-circle" size={32} color={Colors.accent} />
-              </View>
-              <View style={styles.raceCardInfo}>
-                <Text style={styles.raceCardName}>{currentRace?.name || '未开化猿人'}</Text>
-                <View style={styles.raceTier}>
-                  <Ionicons name="star" size={12} color={Colors.accent} />
-                  <Text style={styles.raceTierText}>等级 {currentRace?.tier || 1}</Text>
-                </View>
-              </View>
-              <View style={styles.raceArrow}>
-                <Ionicons name="chevron-forward" size={24} color={Colors.accent} />
-              </View>
-            </View>
-            <Text style={styles.raceDesc}>{currentRace?.description}</Text>
-          </TouchableOpacity>
-        </View>
-
-        <TouchableOpacity style={styles.startButton} onPress={handleStartExploration}>
-          <View style={styles.startButtonIcon}>
-            <Ionicons name="play" size={28} color={Colors.primaryDark} />
-          </View>
-          <Text style={styles.startButtonText}>开始探索</Text>
-          <View style={styles.startButtonDecoration}>
-            <Ionicons name="arrow-forward" size={20} color={Colors.primaryDark} />
-          </View>
-        </TouchableOpacity>
-
-        <View style={styles.systemsSection}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>游戏系统</Text>
-            <View style={styles.sectionDecoration} />
-          </View>
-          <View style={styles.systemsGrid}>
-            {systems.map((system) => (
-              <SystemCard
-                key={system.id}
-                id={system.id}
-                name={system.name}
-                icon={system.icon}
-                description={system.description}
-                unlocked={player.unlockedSystems.includes(system.id)}
-                onPress={() => handleSystemPress(system.id)}
-              />
-            ))}
-          </View>
-        </View>
-      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -343,7 +434,8 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: '#1a0a2e',
+    position: 'relative',
   },
   loadingContainer: {
     flex: 1,
@@ -355,129 +447,247 @@ const styles = StyleSheet.create({
     color: Colors.text,
     fontSize: 16,
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: Layout.padding,
-    paddingTop: 10,
-    paddingBottom: 8,
-  },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  avatarContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: Colors.primaryLight,
-    borderWidth: 2,
-    borderColor: Colors.accent,
-    justifyContent: 'center',
-    alignItems: 'center',
-    ...Colors.shadow.glow,
-  },
-  headerTextContainer: {
-    gap: 2,
-  },
-  welcomeText: {
-    color: Colors.textSecondary,
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  playerName: {
-    color: Colors.accent,
-    fontSize: 22,
-    fontWeight: 'bold',
-  },
-  settingsButton: {
-    padding: 4,
-  },
-  settingsIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: Colors.card,
-    justifyContent: 'center',
-    alignItems: 'center',
-    ...Colors.shadow.card,
-  },
-  subtitleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: Layout.padding,
-    marginBottom: 12,
+  backgroundLayer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: '#1a0a2e',
   },
   topBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.card,
-    marginHorizontal: Layout.padding,
-    marginBottom: 16,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: Layout.borderRadiusLarge,
-    borderWidth: 1,
-    borderColor: Colors.border.subtle,
-    ...Colors.shadow.card,
+    backgroundColor: 'rgba(74, 44, 145, 0.8)',
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    borderBottomWidth: 2,
+    borderBottomColor: Colors.accent,
   },
   topBarItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    paddingHorizontal: 6,
+    paddingVertical: 4,
   },
-  topBarIconContainer: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: Colors.primaryLight,
+  topBarIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
+    marginRight: 6,
   },
   topBarInfo: {
-    gap: 2,
+    alignItems: 'center',
   },
   topBarValue: {
-    color: Colors.accent,
-    fontSize: 16,
+    color: Colors.text,
+    fontSize: 14,
     fontWeight: 'bold',
   },
   topBarLabel: {
     color: Colors.textSecondary,
-    fontSize: 11,
+    fontSize: 10,
   },
-  topBarDivider: {
-    width: 1,
-    height: 32,
-    backgroundColor: Colors.border.subtle,
-    marginHorizontal: 12,
+  topBarQuickButtons: {
+    flexDirection: 'row',
+    marginLeft: 'auto',
+    gap: 8,
   },
-  topBarResources: {
+  topBarQuickButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(74, 44, 145, 0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#4A2C91',
+  },
+  mainContent: {
     flex: 1,
     flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: 12,
+    marginTop: 8,
   },
-  topBarResourceItem: {
+  leftMenu: {
+    width: '35%',
+    paddingLeft: 8,
+    justifyContent: 'flex-end',
+  },
+  subMenuContainer: {
+    backgroundColor: 'rgba(74, 44, 145, 0.8)',
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    marginBottom: 8,
+    borderWidth: 2,
+    borderColor: Colors.accent,
+  },
+  subMenuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    marginVertical: 2,
+    borderRadius: 8,
+    position: 'relative',
   },
-  topBarResourceValue: {
+  subMenuItemSelected: {
+    backgroundColor: Colors.accent,
+  },
+  subMenuText: {
+    color: Colors.accent,
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginLeft: 6,
+    flex: 1,
+  },
+  subMenuTextSelected: {
+    color: Colors.primaryDark,
+  },
+  subMenuNotification: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#FF4D4D',
+    position: 'absolute',
+    top: 6,
+    right: 6,
+  },
+  leftButtonsContainer: {
+    gap: 8,
+  },
+  leftButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(74, 44, 145, 0.7)',
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderWidth: 2,
+    borderColor: '#4A2C91',
+    position: 'relative',
+  },
+  leftButtonIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10,
+  },
+  leftButtonText: {
+    color: Colors.accent,
+    fontSize: 18,
+    fontWeight: 'bold',
+    flex: 1,
+  },
+  leftButtonNotification: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#FF4D4D',
+    position: 'absolute',
+    top: 10,
+    right: 10,
+  },
+  centerArea: {
+    flex: 1,
+    paddingHorizontal: 8,
+    position: 'relative',
+  },
+  mapArea: {
+    flex: 1,
+    backgroundColor: 'rgba(30, 15, 60, 0.5)',
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: '#4A2C91',
+  },
+  mapPlaceholder: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  mapPlaceholderText: {
+    color: Colors.textSecondary,
+    fontSize: 16,
+  },
+  collectButtonArea: {
+    position: 'absolute',
+    bottom: 16,
+    right: 16,
+    alignItems: 'center',
+  },
+  collectButton: {
+    backgroundColor: 'rgba(74, 44, 145, 0.9)',
+    borderRadius: 20,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderWidth: 2,
+    borderColor: Colors.accent,
+  },
+  collectButtonText: {
+    color: Colors.accent,
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  collectInfo: {
     color: Colors.text,
-    fontSize: 13,
+    fontSize: 14,
+    marginTop: 4,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+
+  bottomMenu: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(74, 44, 145, 0.9)',
+    paddingVertical: 10,
+    paddingHorizontal: 4,
+    borderTopWidth: 2,
+    borderTopColor: Colors.accent,
+  },
+  bottomMenuItem: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 4,
+    position: 'relative',
+  },
+  bottomMenuIcon: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 4,
+    borderWidth: 2,
+    borderColor: '#4A2C91',
+  },
+  bottomMenuBadge: {
+    position: 'absolute',
+    top: 0,
+    color: Colors.text,
+    fontSize: 12,
     fontWeight: '600',
   },
-  subtitle: {
-    color: Colors.textSecondary,
-    fontSize: 13,
-    fontStyle: 'italic',
+  bottomMenuText: {
+    color: Colors.accent,
+    fontSize: 12,
+    fontWeight: 'bold',
   },
-  subtitleDecoration: {
-    marginLeft: 8,
+  bottomNotification: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#FF4D4D',
+    position: 'absolute',
+    top: 0,
+    right: 8,
   },
   modalOverlay: {
     flex: 1,
@@ -523,10 +733,10 @@ const styles = StyleSheet.create({
     fontSize: 36,
     fontWeight: 'bold',
   },
-  raceList: {
-    maxHeight: 400,
+  modalList: {
+    maxHeight: 300,
   },
-  raceItem: {
+  modalListItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -537,44 +747,59 @@ const styles = StyleSheet.create({
     borderLeftWidth: 3,
     borderLeftColor: Colors.accent,
   },
-  raceInfo: {
+  modalListItemInfo: {
     flex: 1,
   },
-  raceHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  raceName: {
+  modalListItemName: {
     color: Colors.text,
     fontSize: 18,
     fontWeight: '600',
+    marginBottom: 4,
+  },
+  modalListItemValue: {
+    alignItems: 'center',
+    marginLeft: 15,
+  },
+  modalListItemNumber: {
+    color: Colors.accent,
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  modalListItemUnit: {
+    color: Colors.textSecondary,
+    fontSize: 14,
   },
   tierBadge: {
     backgroundColor: Colors.primaryLight,
     paddingHorizontal: 10,
     paddingVertical: 2,
     borderRadius: 8,
+    alignSelf: 'flex-start',
   },
   tierText: {
     color: Colors.accent,
     fontSize: 12,
     fontWeight: 'bold',
   },
-  raceCountContainer: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    marginLeft: 15,
-    gap: 4,
+  tribeStatusBadge: {
+    backgroundColor: Colors.card,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+    alignSelf: 'flex-start',
+    marginTop: 4,
   },
-  raceCount: {
+  tribeStatusText: {
     color: Colors.accent,
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 11,
+    fontWeight: '600',
   },
-  raceCountLabel: {
+  strengthBreakdown: {
+    marginTop: 6,
+  },
+  strengthBreakdownText: {
     color: Colors.textSecondary,
-    fontSize: 14,
+    fontSize: 12,
   },
   tribesSection: {
     marginTop: 16,
@@ -592,227 +817,5 @@ const styles = StyleSheet.create({
     color: Colors.accent,
     fontSize: 16,
     fontWeight: 'bold',
-  },
-  tribeItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: Colors.primaryDark,
-    padding: 12,
-    borderRadius: 10,
-    marginBottom: 8,
-  },
-  tribeInfo: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  tribeName: {
-    color: Colors.text,
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  tribeStatusBadge: {
-    backgroundColor: Colors.card,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 6,
-  },
-  tribeStatusText: {
-    color: Colors.accent,
-    fontSize: 11,
-    fontWeight: '600',
-  },
-  tribePopulationContainer: {
-    alignItems: 'center',
-  },
-  tribePopulation: {
-    color: Colors.info,
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  tribePopulationLabel: {
-    color: Colors.textSecondary,
-    fontSize: 11,
-  },
-  strengthItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: Colors.card,
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 10,
-    borderLeftWidth: 3,
-    borderLeftColor: Colors.info,
-  },
-  strengthInfo: {
-    flex: 1,
-  },
-  strengthBreakdown: {
-    marginTop: 6,
-  },
-  strengthBreakdownText: {
-    color: Colors.textSecondary,
-    fontSize: 12,
-  },
-  strengthValueContainer: {
-    alignItems: 'center',
-  },
-  strengthValue: {
-    color: Colors.info,
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  strengthValueLabel: {
-    color: Colors.textSecondary,
-    fontSize: 11,
-  },
-  content: {
-    flex: 1,
-    padding: Layout.padding,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-    gap: 12,
-  },
-  sectionTitle: {
-    color: Colors.text,
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  sectionDecoration: {
-    flex: 1,
-    height: 1,
-    backgroundColor: Colors.border.subtle,
-  },
-  resourcesSection: {
-    marginBottom: 24,
-  },
-  resourcesGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  resourceItem: {
-    flex: 1,
-    minWidth: '45%',
-    backgroundColor: Colors.card,
-    padding: 16,
-    borderRadius: Layout.borderRadius,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: Colors.border.subtle,
-    ...Colors.shadow.card,
-  },
-  resourceIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: Colors.primaryLight,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  resourceValue: {
-    color: Colors.accent,
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 4,
-  },
-  resourceName: {
-    color: Colors.textSecondary,
-    fontSize: 14,
-  },
-  raceSection: {
-    marginBottom: 24,
-  },
-  raceCard: {
-    backgroundColor: Colors.card,
-    padding: 20,
-    borderRadius: Layout.borderRadiusLarge,
-    borderWidth: 1,
-    borderColor: Colors.border.accent,
-    ...Colors.shadow.card,
-  },
-  raceCardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  raceIconContainer: {
-    marginRight: 12,
-  },
-  raceCardInfo: {
-    flex: 1,
-    gap: 4,
-  },
-  raceCardName: {
-    color: Colors.accent,
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  raceTier: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  raceTierText: {
-    color: Colors.textSecondary,
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  raceArrow: {
-    marginLeft: 12,
-  },
-  raceDesc: {
-    color: Colors.text,
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  startButton: {
-    flexDirection: 'row',
-    backgroundColor: Colors.accent,
-    paddingVertical: 18,
-    paddingHorizontal: 24,
-    borderRadius: Layout.borderRadiusLarge,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 12,
-    marginBottom: 24,
-    ...Colors.shadow.accent,
-  },
-  startButtonIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: Colors.accentLight,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  startButtonText: {
-    color: Colors.primaryDark,
-    fontSize: 20,
-    fontWeight: 'bold',
-    flex: 1,
-  },
-  startButtonDecoration: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: Colors.accentDark,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  systemsSection: {
-    marginBottom: 40,
-  },
-  systemsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
   },
 });

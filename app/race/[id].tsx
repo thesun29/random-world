@@ -1,15 +1,103 @@
-import React from 'react';
-import { View, StyleSheet, Text, TouchableOpacity, SafeAreaView, ScrollView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, StyleSheet, Text, TouchableOpacity, SafeAreaView, ScrollView, ActivityIndicator } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useGameStore } from '@/store/useGameStore';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import { getRaceById, RACES } from '@/utils/races';
+import { TribeData } from '@/types';
+
+// 临时部落数据，用于演示
+const DEMO_TRIBE_NAMES = [
+  '焰翼部落', '石拳氏族', '月影战士', '雷电猎手', '风暴守护',
+  '森林守卫', '沙漠行者', '冰霜之子', '火焰使者', '暗影猎手',
+  '光明骑士', '暗夜刺客', '暴风战士', '大地守卫', '海洋守护者',
+  '火焰之怒', '雷霆之锤', '冰雪之王', '森林之灵', '沙漠之狐'
+];
+
+const DEMO_TRIBE_ICONS = [
+  'flame', 'hammer', 'moon', 'flash', 'cloudy',
+  'leaf', 'sunny', 'snow', 'fire', 'eye',
+  'shield', 'skull', 'thunderstorm', 'globe', 'water',
+  'bonfire', 'flashlight', 'snow', 'flower', 'paw'
+];
+
+const generateDemoTribes = (): TribeData[] => {
+  const playerTribe: TribeData = {
+    id: 'player_tribe',
+    name: '我的部落',
+    icon: 'people',
+    population: 50,
+    strength: 300,
+    status: 'neutral',
+    discovered: true,
+    vassals: [],
+  };
+
+  const tribes: TribeData[] = [playerTribe];
+
+  // 先生成所有部落
+  const statuses: ('friendly' | 'neutral' | 'enemy' | 'unknown' | 'defeated' | 'vassal')[] = 
+    ['unknown', 'neutral', 'enemy', 'friendly', 'defeated'];
+
+  for (let i = 0; i < 15; i++) {
+    const status = statuses[i % statuses.length];
+    tribes.push({
+      id: `tribe_${i}`,
+      name: DEMO_TRIBE_NAMES[i % DEMO_TRIBE_NAMES.length],
+      icon: DEMO_TRIBE_ICONS[i % DEMO_TRIBE_ICONS.length],
+      population: Math.floor(Math.random() * 100) + 10,
+      strength: Math.floor(Math.random() * 500) + 50,
+      status,
+      discovered: status !== 'unknown',
+      vassals: [],
+    });
+  }
+
+  // 随机生成附庸关系（大约30%的部落会有附庸）
+  for (let i = 1; i < tribes.length; i++) {
+    if (Math.random() < 0.3) {
+      // 随机选择一个宗主（不能是自己）
+      let overlordIndex;
+      do {
+        overlordIndex = Math.floor(Math.random() * tribes.length);
+      } while (overlordIndex === i);
+      
+      const overlord = tribes[overlordIndex];
+      const vassal = tribes[i];
+      
+      // 设置附庸关系
+      if (!overlord.vassals) overlord.vassals = [];
+      overlord.vassals.push(vassal.id);
+      vassal.overlord = overlord.id;
+      
+      // 如果宗主被发现了，附庸的状态也显示为附庸
+      if (overlord.discovered) {
+        vassal.status = 'vassal';
+        vassal.discovered = true;
+      }
+    }
+  }
+
+  return tribes;
+};
 
 export default function RaceDetailScreen() {
   const { id } = useLocalSearchParams();
+  const { currentRun, player } = useGameStore();
+  const [tribes, setTribes] = useState<TribeData[]>([]);
   const raceId = Array.isArray(id) ? id[0] : id;
   const race = getRaceById(raceId);
+
+  useEffect(() => {
+    if (currentRun?.allTribes && currentRun.allTribes.length > 0) {
+      setTribes(currentRun.allTribes);
+    } else {
+      // 如果没有运行中的游戏，使用示例数据
+      setTribes(generateDemoTribes());
+    }
+  }, [currentRun]);
 
   if (!race) {
     return (
@@ -19,18 +107,138 @@ export default function RaceDetailScreen() {
     );
   }
 
-  const calculateEquipmentStrength = () => {
-    let total = 0;
-    race.equipmentSlots.forEach(slot => {
-      if (slot.unlocked) {
-        total += slot.strengthBonus;
-      }
-    });
-    return total;
+  const playerTribe = tribes[0];
+  const otherTribes = tribes.slice(1);
+
+  const getTribeStyle = (tribe: TribeData) => {
+    if (!tribe.discovered || tribe.status === 'unknown') {
+      return { nameColor: Colors.textMuted, opacity: 0.7 };
+    }
+    switch (tribe.status) {
+      case 'friendly':
+        return { nameColor: Colors.success, opacity: 1 };
+      case 'neutral':
+        return { nameColor: Colors.text, opacity: 1 };
+      case 'enemy':
+        return { nameColor: Colors.error, opacity: 1 };
+      case 'defeated':
+        return { nameColor: Colors.textMuted, opacity: 0.5 };
+      case 'vassal':
+        return { nameColor: Colors.accent, opacity: 1 };
+      default:
+        return { nameColor: Colors.text, opacity: 1 };
+    }
   };
 
-  const equipmentStrength = calculateEquipmentStrength();
-  const totalPerPerson = (race.baseStrength + equipmentStrength) * race.strengthMultiplier;
+  const getTribeIcon = (tribe: TribeData) => {
+    if (!tribe.discovered || tribe.status === 'unknown') {
+      return 'help-circle';
+    }
+    if (tribe.status === 'vassal') {
+      return 'checkmark-circle';
+    }
+    return tribe.icon;
+  };
+
+  const getTribeName = (tribe: TribeData) => {
+    if (!tribe.discovered || tribe.status === 'unknown') {
+      return '???';
+    }
+    return tribe.name;
+  };
+
+  const renderTribeItem = (tribe: TribeData, index: number, isPlayerTribe = false) => {
+    const style = getTribeStyle(tribe);
+    const isVassal = tribe.status === 'vassal';
+    const overlord = tribe.overlord ? tribes.find(t => t.id === tribe.overlord) : null;
+    
+    return (
+      <View key={tribe.id} style={[styles.tribeItem, { opacity: style.opacity }]}>
+        <View style={styles.tribeLeft}>
+          <View style={styles.tribeIconContainer}>
+            <Ionicons 
+              name={getTribeIcon(tribe) as any} 
+              size={24} 
+              color={isVassal ? Colors.success : Colors.accent} 
+            />
+          </View>
+          <View style={styles.tribeInfo}>
+            <Text style={[styles.tribeName, { color: style.nameColor }]}>
+              {getTribeName(tribe)}
+              {isPlayerTribe && <Text style={styles.playerTribeTag}> (自己)</Text>}
+            </Text>
+            
+            {/* 显示宗主关系 */}
+            {tribe.overlord && overlord && (
+              <Text style={styles.overlordText}>
+                臣服于: {overlord.discovered ? overlord.name : '???'}
+              </Text>
+            )}
+            
+            {tribe.discovered && tribe.status !== 'unknown' && (
+              <View style={styles.tribeStats}>
+                <Text style={styles.tribeStat}>
+                  <Ionicons name="people" size={14} color={Colors.textMuted} />
+                  {' '}{tribe.population}
+                </Text>
+                <Text style={styles.tribeStat}>
+                  <Ionicons name="shield" size={14} color={Colors.textMuted} />
+                  {' '}{tribe.strength}
+                </Text>
+              </View>
+            )}
+            
+            {/* 显示附庸部落 */}
+            {tribe.vassals && tribe.vassals.length > 0 && (
+              <View style={styles.vassalsList}>
+                <Text style={styles.vassalsLabel}>附庸: </Text>
+                {tribe.vassals.map((vassalId, idx) => {
+                  const vassal = tribes.find(t => t.id === vassalId);
+                  if (!vassal) return null;
+                  return (
+                    <Text key={vassalId} style={styles.vassalTag}>
+                      {vassal.discovered ? vassal.name : '???'}
+                      {idx < tribe.vassals!.length - 1 ? ', ' : ''}
+                    </Text>
+                  );
+                })}
+              </View>
+            )}
+          </View>
+        </View>
+        {tribe.status !== 'unknown' && (
+          <View style={[styles.statusBadge, styles[`statusBadge_${tribe.status}`]]}>
+            <Text style={styles.statusText}>
+              {tribe.status === 'friendly' && '友好'}
+              {tribe.status === 'neutral' && '中立'}
+              {tribe.status === 'enemy' && '敌对'}
+              {tribe.status === 'defeated' && '已消灭'}
+              {tribe.status === 'vassal' && '附庸'}
+            </Text>
+          </View>
+        )}
+      </View>
+    );
+  };
+
+  if (tribes.length === 0) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={24} color={Colors.text} />
+          </TouchableOpacity>
+          <Text style={styles.title}>部落列表</Text>
+          <View style={styles.placeholder} />
+        </View>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={Colors.accent} />
+          <Text style={styles.loadingText}>正在加载部落数据...</Text>
+          <Text style={styles.subText}>开始新游戏即可生成部落</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -38,108 +246,27 @@ export default function RaceDetailScreen() {
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={24} color={Colors.text} />
         </TouchableOpacity>
-        <Text style={styles.title}>{race.name}</Text>
+        <Text style={styles.title}>部落列表 ({tribes.length})</Text>
         <View style={styles.placeholder} />
       </View>
 
       <ScrollView style={styles.content}>
-        {/* 基本信息 */}
-        <View style={styles.basicInfoSection}>
-          <View style={styles.raceIcon}>
-            <Ionicons name="people" size={50} color={Colors.accent} />
-          </View>
-          <View style={styles.raceInfo}>
-            <Text style={styles.raceName}>{race.name}</Text>
-            <Text style={styles.raceDesc}>{race.description}</Text>
-            <View style={styles.raceTier}>
-              <Ionicons name="trophy" size={14} color={Colors.accent} />
-              <Text style={styles.tierText}>等级 {race.tier}</Text>
+        {/* 玩家部落 */}
+        {playerTribe && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>我的部落</Text>
+            <View style={styles.tribeList}>
+              {renderTribeItem(playerTribe, 0, true)}
             </View>
           </View>
-        </View>
+        )}
 
-        {/* 战力详情 */}
-        <View style={styles.strengthSection}>
-          <Text style={styles.sectionTitle}>战力详情</Text>
-          
-          <View style={styles.strengthCard}>
-            <View style={styles.strengthItem}>
-              <View style={styles.strengthItemLeft}>
-                <Ionicons name="body" size={20} color={Colors.accent} />
-                <Text style={styles.strengthLabel}>基础战力</Text>
-              </View>
-              <Text style={styles.strengthValue}>{race.baseStrength}</Text>
-            </View>
-
-            <View style={styles.divider} />
-
-            <View style={styles.strengthItem}>
-              <View style={styles.strengthItemLeft}>
-                <Ionicons name="shield" size={20} color={Colors.accent} />
-                <Text style={styles.strengthLabel}>装备加成</Text>
-              </View>
-              <Text style={styles.strengthValue}>+{equipmentStrength}</Text>
-            </View>
-
-            <View style={styles.divider} />
-
-            <View style={styles.strengthItem}>
-              <View style={styles.strengthItemLeft}>
-                <Ionicons name="trending-up" size={20} color={Colors.accent} />
-                <Text style={styles.strengthLabel}>种族倍率</Text>
-              </View>
-              <Text style={styles.strengthValue}>×{race.strengthMultiplier.toFixed(1)}</Text>
-            </View>
-
-            <View style={styles.totalStrengthContainer}>
-              <Text style={styles.totalStrengthLabel}>单个人战力</Text>
-              <Text style={styles.totalStrengthValue}>{Math.floor(totalPerPerson)}</Text>
-            </View>
-          </View>
-        </View>
-
-        {/* 装备槽 */}
-        <View style={styles.equipmentSection}>
-          <Text style={styles.sectionTitle}>装备槽</Text>
-          <View style={styles.equipmentList}>
-            {race.equipmentSlots.map((slot, index) => (
-              <View key={index} style={[styles.equipmentSlot, !slot.unlocked && styles.equipmentSlotLocked]}>
-                <View style={styles.equipmentSlotLeft}>
-                  <Ionicons 
-                    name={slot.unlocked ? "checkmark-circle" : "lock-closed"} 
-                    size={20} 
-                    color={slot.unlocked ? Colors.success : Colors.textMuted} 
-                  />
-                  <Text style={[styles.equipmentName, !slot.unlocked && styles.equipmentNameLocked]}>
-                    {slot.name}
-                  </Text>
-                </View>
-                <Text style={[styles.equipmentBonus, !slot.unlocked && styles.equipmentBonusLocked]}>
-                  +{slot.strengthBonus}
-                </Text>
-              </View>
-            ))}
-          </View>
-        </View>
-
-        {/* 进化路径 */}
-        {race.evolutions && race.evolutions.length > 0 && (
-          <View style={styles.evolutionSection}>
-            <Text style={styles.sectionTitle}>进化方向</Text>
-            <View style={styles.evolutionList}>
-              {race.evolutions.map((evolutionId, index) => {
-                const evolution = RACES[evolutionId];
-                return (
-                  <TouchableOpacity
-                    key={index}
-                    style={styles.evolutionItem}
-                    onPress={() => router.push(`/race/${evolutionId}`)}
-                  >
-                    <Ionicons name="arrow-forward" size={16} color={Colors.accent} />
-                    <Text style={styles.evolutionName}>{evolution?.name}</Text>
-                  </TouchableOpacity>
-                );
-              })}
+        {/* 其他部落 */}
+        {otherTribes.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>其他部落 ({otherTribes.length})</Text>
+            <View style={styles.tribeList}>
+              {otherTribes.map((tribe, index) => renderTribeItem(tribe, index))}
             </View>
           </View>
         )}
@@ -181,55 +308,26 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 100,
   },
-  basicInfoSection: {
-    flexDirection: 'row',
-    backgroundColor: Colors.card,
-    padding: 20,
-    borderRadius: Layout.borderRadius,
-    marginBottom: 20,
-    ...Layout.shadow,
-  },
-  raceIcon: {
-    width: 80,
-    height: 80,
-    backgroundColor: Colors.primaryLight,
-    borderRadius: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 16,
-  },
-  raceInfo: {
+  loadingContainer: {
     flex: 1,
-  },
-  raceName: {
-    color: Colors.accent,
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  raceDesc: {
-    color: Colors.text,
-    fontSize: 14,
-    lineHeight: 20,
-    marginBottom: 12,
-  },
-  raceTier: {
-    flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: Colors.primaryLight,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
-    alignSelf: 'flex-start',
-    gap: 6,
+    padding: 20,
   },
-  tierText: {
-    color: Colors.accent,
-    fontSize: 12,
-    fontWeight: '600',
+  loadingText: {
+    color: Colors.text,
+    fontSize: 16,
+    marginTop: 16,
+    textAlign: 'center',
   },
-  strengthSection: {
-    marginBottom: 20,
+  subText: {
+    color: Colors.textMuted,
+    fontSize: 14,
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  section: {
+    marginBottom: 24,
   },
   sectionTitle: {
     color: Colors.text,
@@ -237,114 +335,121 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 12,
   },
-  strengthCard: {
+  tribeList: {
     backgroundColor: Colors.card,
-    padding: 20,
     borderRadius: Layout.borderRadius,
     ...Layout.shadow,
   },
-  strengthItem: {
+  tribeItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 8,
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.primaryLight,
   },
-  strengthItemLeft: {
+  tribeLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    flex: 1,
   },
-  strengthLabel: {
-    color: Colors.text,
-    fontSize: 16,
-  },
-  strengthValue: {
-    color: Colors.accent,
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  divider: {
-    height: 1,
+  tribeIconContainer: {
+    width: 48,
+    height: 48,
     backgroundColor: Colors.primaryLight,
-    marginVertical: 8,
-  },
-  totalStrengthContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    borderRadius: 24,
+    justifyContent: 'center',
     alignItems: 'center',
-    paddingTop: 16,
-    marginTop: 8,
-    borderTopWidth: 2,
-    borderTopColor: Colors.accent,
+    marginRight: 12,
   },
-  totalStrengthLabel: {
-    color: Colors.text,
+  tribeInfo: {
+    flex: 1,
+  },
+  tribeName: {
     fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  playerTribeTag: {
+    color: Colors.accent,
+    fontSize: 12,
+  },
+  tribeStats: {
+    flexDirection: 'row',
+    gap: 16,
+  },
+  tribeStat: {
+    color: Colors.textMuted,
+    fontSize: 14,
+  },
+  statusBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    alignSelf: 'flex-start',
+  },
+  statusBadge_unknown: {
+    backgroundColor: Colors.primaryLight,
+  },
+  statusBadge_friendly: {
+    backgroundColor: Colors.success + '30',
+  },
+  statusBadge_neutral: {
+    backgroundColor: Colors.primaryLight,
+  },
+  statusBadge_enemy: {
+    backgroundColor: Colors.error + '30',
+  },
+  statusBadge_defeated: {
+    backgroundColor: Colors.textMuted + '30',
+  },
+  statusBadge_vassal: {
+    backgroundColor: Colors.success + '30',
+  },
+  statusText: {
+    color: Colors.text,
+    fontSize: 12,
     fontWeight: '600',
   },
-  totalStrengthValue: {
-    color: Colors.accent,
-    fontSize: 28,
-    fontWeight: 'bold',
+  vassalContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 8,
   },
-  equipmentSection: {
-    marginBottom: 20,
+  vassalTitle: {
+    color: Colors.text,
+    fontSize: 14,
   },
-  equipmentList: {
+  vassalList: {
     backgroundColor: Colors.card,
     borderRadius: Layout.borderRadius,
+    padding: 16,
     ...Layout.shadow,
   },
-  equipmentSlot: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.primaryLight,
-  },
-  equipmentSlotLocked: {
-    opacity: 0.5,
-  },
-  equipmentSlotLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  equipmentName: {
-    color: Colors.text,
-    fontSize: 16,
-  },
-  equipmentNameLocked: {
-    color: Colors.textMuted,
-  },
-  equipmentBonus: {
+  vassalName: {
     color: Colors.success,
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontSize: 14,
+    marginBottom: 4,
   },
-  equipmentBonusLocked: {
+  overlordText: {
     color: Colors.textMuted,
+    fontSize: 12,
+    fontStyle: 'italic',
+    marginBottom: 4,
   },
-  evolutionSection: {
-    marginBottom: 40,
-  },
-  evolutionList: {
-    backgroundColor: Colors.card,
-    borderRadius: Layout.borderRadius,
-    ...Layout.shadow,
-  },
-  evolutionItem: {
+  vassalsList: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     alignItems: 'center',
-    padding: 16,
-    gap: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.primaryLight,
+    marginTop: 4,
   },
-  evolutionName: {
-    color: Colors.accent,
-    fontSize: 16,
-    fontWeight: '600',
+  vassalsLabel: {
+    color: Colors.textMuted,
+    fontSize: 12,
+  },
+  vassalTag: {
+    color: Colors.success,
+    fontSize: 12,
   },
 });

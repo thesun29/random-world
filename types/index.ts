@@ -20,9 +20,13 @@ export interface WorldData {
 export interface TribeData {
   id: string;
   name: string;
+  icon: string;
   population: number;
   strength: number;
-  status: 'enemy' | 'vassal' | 'merged';
+  status: 'unknown' | 'friendly' | 'neutral' | 'enemy' | 'defeated' | 'vassal';
+  discovered?: boolean;
+  vassals?: string[]; // 附庸部落的ID数组
+  overlord?: string; // 宗主部落的ID
 }
 
 export interface RunData {
@@ -37,6 +41,7 @@ export interface RunData {
   totalStrength: number;
   encounteredTribes: TribeData[];
   defeatedTribes: TribeData[];
+  allTribes: TribeData[];
 }
 
 export interface GameEvent {

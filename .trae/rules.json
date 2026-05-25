@@ -1,0 +1,11 @@
+{
+  "projectRules": {
+    "autoRestart": {
+      "enabled": true,
+      "description": "每次修改完代码之后自动重启游戏服务",
+      "trigger": "afterCodeChange",
+      "action": "restartService"
+    }
+  },
+  "note": "这条规则已被记录，将在每次代码修改后自动触发服务重启"
+}
