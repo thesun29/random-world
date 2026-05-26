@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, StyleSheet, Text, TouchableOpacity, SafeAreaView, ScrollView } from 'react-native';
+import { View, StyleSheet, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useGameStore } from '@/store/useGameStore';
@@ -7,6 +7,7 @@ import ProgressBar from '@/components/ProgressBar';
 import NotepadEvent from '@/components/NotepadEvent';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
+import ScalableView from '@/components/ScalableView';
 import { generateEventByProgress } from '@/utils/events';
 import { getRaceById } from '@/utils/races';
 import { GameEvent, EventHistoryItem } from '@/types';
@@ -143,18 +144,18 @@ export default function ExploreScreen() {
   const currentRace = getRaceById(currentRun.currentRace);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <ScalableView style={styles.container} scrollable scrollViewProps={{ ref: scrollViewRef }}>
       {/* 顶部状态栏 */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
           <View style={styles.backButtonIcon}>
-            <Ionicons name="arrow-back" size={22} color={Colors.text} />
+            <Ionicons name="arrow-back" size={Layout.scale(22)} color={Colors.text} />
           </View>
         </TouchableOpacity>
         <View style={styles.headerCenter}>
           <Text style={styles.title}>探索中</Text>
           <View style={styles.raceStatusBadge}>
-            <Ionicons name="people" size={12} color={Colors.accent} />
+            <Ionicons name="people" size={Layout.scale(12)} color={Colors.accent} />
             <Text style={styles.raceStatus}>
               {currentRace?.name || '未开化猿人'}
             </Text>
@@ -173,7 +174,7 @@ export default function ExploreScreen() {
         {/* 人口 */}
         <View key="population" style={styles.resourceItem}>
           <View style={styles.resourceIconContainer}>
-            <Ionicons name="people" size={18} color={Colors.accent} />
+            <Ionicons name="people" size={Layout.scale(18)} color={Colors.accent} />
           </View>
           <Text style={styles.resourceValue}>{currentRun.population ?? 0}</Text>
           <Text style={styles.resourceKey}>人口</Text>
@@ -181,7 +182,7 @@ export default function ExploreScreen() {
         {/* 战力 */}
         <View key="strength" style={styles.resourceItem}>
           <View style={styles.resourceIconContainer}>
-            <Ionicons name="shield-checkmark" size={18} color={Colors.accent} />
+            <Ionicons name="shield-checkmark" size={Layout.scale(18)} color={Colors.accent} />
           </View>
           <Text style={styles.resourceValue}>{currentRun.totalStrength ?? 0}</Text>
           <Text style={styles.resourceKey}>战力</Text>
@@ -191,7 +192,7 @@ export default function ExploreScreen() {
             <View style={styles.resourceIconContainer}>
               <Ionicons 
                 name={key === 'food' ? 'restaurant' : key === 'water' ? 'water' : key === 'wood' ? 'leaf' : 'cube'} 
-                size={18} 
+                size={Layout.scale(18)} 
                 color={Colors.accent} 
               />
             </View>
@@ -204,15 +205,11 @@ export default function ExploreScreen() {
       </View>
 
       {/* 记事本内容区域 */}
-      <ScrollView 
-        ref={scrollViewRef}
-        style={styles.notepad}
-        contentContainerStyle={styles.notepadContent}
-      >
+      <View style={styles.notepad}>
         {/* 开始标记 */}
         <View style={styles.startMarker}>
           <View style={styles.startMarkerIcon}>
-            <Ionicons name="play-circle" size={28} color={Colors.accent} />
+            <Ionicons name="play-circle" size={Layout.scale(28)} color={Colors.accent} />
           </View>
           <Text style={styles.startText}>探索开始</Text>
           <View style={styles.startMarkerLine} />
@@ -243,7 +240,7 @@ export default function ExploreScreen() {
             {currentRun?.population <= 0 ? (
               <>
                 <View style={styles.completeIconContainer}>
-                  <Ionicons name="skull" size={56} color={Colors.error} />
+                  <Ionicons name="skull" size={Layout.scale(56)} color={Colors.error} />
                 </View>
                 <Text style={[styles.completeTitle, { color: Colors.error }]}>族群灭亡！</Text>
                 <Text style={styles.completeSubtitle}>所有族人都已死亡...</Text>
@@ -251,7 +248,7 @@ export default function ExploreScreen() {
             ) : (
               <>
                 <View style={styles.completeIconContainer}>
-                  <Ionicons name="trophy" size={56} color={Colors.accent} />
+                  <Ionicons name="trophy" size={Layout.scale(56)} color={Colors.accent} />
                 </View>
                 <Text style={styles.completeTitle}>探索完成！</Text>
                 <Text style={styles.completeSubtitle}>恭喜你完成了本次探索</Text>
@@ -259,15 +256,15 @@ export default function ExploreScreen() {
             )}
             <TouchableOpacity style={styles.completeButton} onPress={handleComplete}>
               <Text style={styles.completeButtonText}>查看结果</Text>
-              <Ionicons name="arrow-forward" size={20} color={Colors.primaryDark} />
+              <Ionicons name="arrow-forward" size={Layout.scale(20)} color={Colors.primaryDark} />
             </TouchableOpacity>
           </View>
         )}
 
         {/* 底部留白 */}
         <View style={styles.bottomPadding} />
-      </ScrollView>
-    </SafeAreaView>
+      </View>
+    </ScalableView>
   );
 }
 
@@ -281,16 +278,16 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: Layout.padding,
-    paddingTop: 10,
-    paddingBottom: 10,
+    paddingTop: Layout.scale(10),
+    paddingBottom: Layout.scale(10),
   },
   backButton: {
-    padding: 4,
+    padding: Layout.scale(4),
   },
   backButtonIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: Layout.scale(40),
+    height: Layout.scale(40),
+    borderRadius: Layout.borderRadiusXLarge,
     backgroundColor: Colors.card,
     justifyContent: 'center',
     alignItems: 'center',
@@ -298,141 +295,141 @@ const styles = StyleSheet.create({
   },
   headerCenter: {
     alignItems: 'center',
-    gap: 4,
+    gap: Layout.scale(4),
   },
   title: {
     color: Colors.accent,
-    fontSize: 22,
+    fontSize: Layout.fontScale(22),
     fontWeight: 'bold',
   },
   raceStatusBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.primaryLight,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    gap: 4,
+    paddingHorizontal: Layout.scale(10),
+    paddingVertical: Layout.scale(4),
+    borderRadius: Layout.borderRadius,
+    gap: Layout.scale(4),
   },
   raceStatus: {
     color: Colors.accent,
-    fontSize: 12,
+    fontSize: Layout.fontScale(12),
     fontWeight: '600',
   },
   placeholder: {
-    width: 40,
+    width: Layout.scale(40),
   },
   progressSection: {
     paddingHorizontal: Layout.padding,
-    marginBottom: 12,
+    marginBottom: Layout.scale(12),
   },
   resourcesBar: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     paddingHorizontal: Layout.padding,
-    gap: 8,
-    marginBottom: 12,
+    gap: Layout.scale(8),
+    marginBottom: Layout.scale(12),
   },
   resourceItem: {
     alignItems: 'center',
     backgroundColor: Colors.card,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
+    paddingHorizontal: Layout.scale(14),
+    paddingVertical: Layout.scale(8),
     borderRadius: Layout.borderRadius,
     borderWidth: 1,
     borderColor: Colors.border.subtle,
-    gap: 4,
+    gap: Layout.scale(4),
   },
   resourceIconContainer: {
-    marginBottom: 2,
+    marginBottom: Layout.scale(2),
   },
   resourceValue: {
     color: Colors.accent,
-    fontSize: 16,
+    fontSize: Layout.fontScale(16),
     fontWeight: 'bold',
   },
   resourceKey: {
     color: Colors.textSecondary,
-    fontSize: 11,
+    fontSize: Layout.fontScale(11),
   },
   notepad: {
     flex: 1,
   },
   notepadContent: {
     paddingHorizontal: Layout.padding,
-    paddingTop: 10,
+    paddingTop: Layout.scale(10),
   },
   startMarker: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 24,
-    gap: 12,
+    paddingVertical: Layout.scale(24),
+    gap: Layout.scale(12),
   },
   startMarkerIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: Layout.scale(48),
+    height: Layout.scale(48),
+    borderRadius: Layout.borderRadiusXLarge,
     backgroundColor: Colors.primaryLight,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 2,
+    borderWidth: Layout.scale(2),
     borderColor: Colors.accent,
   },
   startText: {
     color: Colors.textSecondary,
-    fontSize: 18,
+    fontSize: Layout.fontScale(18),
     fontWeight: '600',
   },
   startMarkerLine: {
-    width: 40,
-    height: 2,
+    width: Layout.scale(40),
+    height: Layout.scale(2),
     backgroundColor: Colors.border.subtle,
   },
   completeSection: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 48,
-    gap: 20,
+    paddingVertical: Layout.scale(48),
+    gap: Layout.scale(20),
   },
   completeIconContainer: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: Layout.scale(100),
+    height: Layout.scale(100),
+    borderRadius: Layout.scale(50),
     backgroundColor: Colors.card,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 3,
+    borderWidth: Layout.scale(3),
     borderColor: Colors.accent,
     ...Colors.shadow.glow,
   },
   completeTitle: {
     color: Colors.accent,
-    fontSize: 28,
+    fontSize: Layout.fontScale(28),
     fontWeight: 'bold',
   },
   completeSubtitle: {
     color: Colors.textMuted,
-    fontSize: 16,
-    marginTop: 8,
+    fontSize: Layout.fontScale(16),
+    marginTop: Layout.scale(8),
   },
   completeButton: {
     flexDirection: 'row',
     backgroundColor: Colors.accent,
-    paddingVertical: 16,
-    paddingHorizontal: 32,
+    paddingVertical: Layout.scale(16),
+    paddingHorizontal: Layout.scale(32),
     borderRadius: Layout.borderRadiusLarge,
     alignItems: 'center',
-    gap: 10,
-    marginTop: 16,
+    gap: Layout.scale(10),
+    marginTop: Layout.scale(16),
     ...Colors.shadow.accent,
   },
   completeButtonText: {
     color: Colors.primaryDark,
-    fontSize: 18,
+    fontSize: Layout.fontScale(18),
     fontWeight: 'bold',
   },
   bottomPadding: {
-    height: 48,
+    height: Layout.scale(48),
   },
 });

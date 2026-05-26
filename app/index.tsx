@@ -4,6 +4,7 @@ import { router } from 'expo-router';
 import { useGameStore } from '@/store/useGameStore';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
+import ScalableView from '@/components/ScalableView';
 
 export default function LoginScreen() {
   const { player, loadSavedPlayer } = useGameStore();
@@ -27,84 +28,92 @@ export default function LoginScreen() {
 
   if (isLoading) {
     return (
-      <View style={styles.container}>
-        <ActivityIndicator size="large" color={Colors.accent} />
-        <Text style={styles.loadingText}>加载中...</Text>
-      </View>
+      <ScalableView>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={Colors.accent} />
+          <Text style={styles.loadingText}>加载中...</Text>
+        </View>
+      </ScalableView>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>随机世界</Text>
-        <Text style={styles.subtitle}>文字肉鸽生存游戏</Text>
+    <ScalableView>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.title}>随机世界</Text>
+          <Text style={styles.subtitle}>文字肉鸽生存游戏</Text>
+        </View>
+
+        <View style={styles.logoContainer}>
+          <Text style={styles.logo}>🌟</Text>
+        </View>
+
+        <TouchableOpacity 
+          style={styles.primaryButton} 
+          onPress={handleStartGame}
+        >
+          <Text style={styles.primaryButtonText}>开始游戏</Text>
+        </TouchableOpacity>
+
+        <Text style={styles.disclaimer}>成为造物主，引导你的种族走向辉煌</Text>
       </View>
-
-      <View style={styles.logoContainer}>
-        <Text style={styles.logo}>🌟</Text>
-      </View>
-
-      <TouchableOpacity 
-        style={styles.primaryButton} 
-        onPress={handleStartGame}
-      >
-        <Text style={styles.primaryButtonText}>开始游戏</Text>
-      </TouchableOpacity>
-
-      <Text style={styles.disclaimer}>成为造物主，引导你的种族走向辉煌</Text>
-    </View>
+    </ScalableView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: Colors.background,
-    padding: Layout.padding,
+    width: '100%',
+    maxWidth: Layout.scale(360),
     justifyContent: 'center',
     alignItems: 'center',
   },
   header: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: Layout.scale(20),
   },
   title: {
     color: Colors.accent,
-    fontSize: 36,
+    fontSize: Layout.fontScale(28),
     fontWeight: 'bold',
-    marginBottom: 8,
+    marginBottom: Layout.scale(6),
   },
   subtitle: {
     color: Colors.textSecondary,
-    fontSize: 16,
+    fontSize: Layout.fontScale(15),
   },
   logoContainer: {
-    marginBottom: 60,
+    marginBottom: Layout.scale(28),
   },
   logo: {
-    fontSize: 100,
+    fontSize: Layout.scale(72),
   },
   primaryButton: {
     backgroundColor: Colors.accent,
-    paddingVertical: 16,
-    paddingHorizontal: 32,
+    paddingVertical: Layout.scale(13),
+    paddingHorizontal: Layout.scale(36),
     borderRadius: Layout.borderRadius,
     alignItems: 'center',
   },
   primaryButtonText: {
     color: Colors.primaryDark,
-    fontSize: 18,
+    fontSize: Layout.fontScale(17),
     fontWeight: 'bold',
   },
   loadingText: {
     color: Colors.text,
-    fontSize: 18,
+    fontSize: Layout.fontScale(17),
   },
   disclaimer: {
     color: Colors.textMuted,
-    fontSize: 14,
-    marginTop: 40,
+    fontSize: Layout.fontScale(12),
+    marginTop: Layout.scale(20),
     textAlign: 'center',
+  },
+  loadingContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: Layout.scale(16),
   },
 });

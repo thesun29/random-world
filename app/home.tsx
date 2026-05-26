@@ -1,21 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Text, TouchableOpacity, SafeAreaView, Modal, Pressable, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, Text, TouchableOpacity, Modal, Pressable, ActivityIndicator } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useGameStore } from '@/store/useGameStore';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
+import ScalableView from '@/components/ScalableView';
 import { getRaceById, RACES } from '@/utils/races';
 
 // 左侧系统菜单
 const leftMenuItems = [
-  { id: 'materials', name: '材料', icon: 'nutrition' },
   { id: 'essence', name: '精华', icon: 'flame' },
   { id: 'dishes', name: '菜品', icon: 'restaurant' },
   { id: 'secrets', name: '秘术', icon: 'sparkles' },
   { id: 'beasts', name: '异兽', icon: 'paw' },
-  { id: 'weapons', name: '神兵', icon: 'shield' },
-  { id: 'building', name: '修建', icon: 'construct' },
+  { id: 'equipment', name: '装备', icon: 'construct' },
+  { id: 'building', name: '修建', icon: 'hammer' },
   { id: 'empire', name: '帝名', icon: 'crown' },
 ];
 
@@ -53,9 +53,7 @@ export default function HomeScreen() {
 
   const handleLeftMenuPress = (itemId: string) => {
     setSelectedMenu(itemId);
-    if (itemId === 'race') {
-      router.push(`/race/${player?.worldData.unlockedRaces[player.worldData.unlockedRaces.length - 1]}`);
-    } else if (['dishes', 'secrets', 'beasts', 'weapons', 'building', 'empire'].includes(itemId)) {
+    if (['essence', 'dishes', 'secrets', 'beasts', 'equipment', 'building', 'empire'].includes(itemId)) {
       router.push(`/system/${itemId}`);
     }
   };
@@ -70,12 +68,12 @@ export default function HomeScreen() {
 
   if (isLoading || !player) {
     return (
-      <SafeAreaView style={styles.container}>
+      <ScalableView>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={Colors.accent} />
           <Text style={styles.loadingText}>加载中...</Text>
         </View>
-      </SafeAreaView>
+      </ScalableView>
     );
   }
 
@@ -122,7 +120,7 @@ export default function HomeScreen() {
   const totalStrength = getAllRacesWithStrength().reduce((sum, race) => sum + race.strength, 0);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <ScalableView centered={false}>
       {/* 背景层 */}
       <View style={styles.backgroundLayer} />
       
@@ -130,84 +128,70 @@ export default function HomeScreen() {
       <View style={styles.topBar}>
         <TouchableOpacity style={styles.topBarItem}>
           <View style={[styles.topBarIcon, { backgroundColor: '#8D6E63' }]}>
-            <Ionicons name="cube" size={18} color="#FFFFFF" />
+            <Ionicons name="cube" size={Layout.scale(12)} color="#FFFFFF" />
           </View>
-          <View style={styles.topBarInfo}>
-            <Text style={styles.topBarValue}>{player.worldData.resources?.stone || 0}</Text>
-            <Text style={styles.topBarLabel}>石头</Text>
-          </View>
+          <Text style={styles.topBarLabel}>石头</Text>
+          <Text style={styles.topBarValue}>{player.worldData.resources?.stone || 0}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.topBarItem}>
           <View style={[styles.topBarIcon, { backgroundColor: '#795548' }]}>
-            <Ionicons name="leaf" size={18} color="#FFFFFF" />
+            <Ionicons name="leaf" size={Layout.scale(12)} color="#FFFFFF" />
           </View>
-          <View style={styles.topBarInfo}>
-            <Text style={styles.topBarValue}>{player.worldData.resources?.wood || 0}</Text>
-            <Text style={styles.topBarLabel}>木材</Text>
-          </View>
+          <Text style={styles.topBarLabel}>木材</Text>
+          <Text style={styles.topBarValue}>{player.worldData.resources?.wood || 0}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.topBarItem}>
           <View style={[styles.topBarIcon, { backgroundColor: '#4CAF50' }]}>
-            <Ionicons name="flask" size={18} color="#FFFFFF" />
+            <Ionicons name="flask" size={Layout.scale(12)} color="#FFFFFF" />
           </View>
-          <View style={styles.topBarInfo}>
-            <Text style={styles.topBarValue}>0</Text>
-            <Text style={styles.topBarLabel}>草药</Text>
-          </View>
+          <Text style={styles.topBarLabel}>草药</Text>
+          <Text style={styles.topBarValue}>0</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.topBarItem}>
           <View style={[styles.topBarIcon, { backgroundColor: '#2196F3' }]}>
-            <Ionicons name="water" size={18} color="#FFFFFF" />
+            <Ionicons name="water" size={Layout.scale(12)} color="#FFFFFF" />
           </View>
-          <View style={styles.topBarInfo}>
-            <Text style={styles.topBarValue}>{player.worldData.resources?.water || 0}</Text>
-            <Text style={styles.topBarLabel}>水</Text>
-          </View>
+          <Text style={styles.topBarLabel}>水</Text>
+          <Text style={styles.topBarValue}>{player.worldData.resources?.water || 0}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.topBarItem}>
           <View style={[styles.topBarIcon, { backgroundColor: '#FF9800' }]}>
-            <Ionicons name="restaurant" size={18} color="#FFFFFF" />
+            <Ionicons name="restaurant" size={Layout.scale(12)} color="#FFFFFF" />
           </View>
-          <View style={styles.topBarInfo}>
-            <Text style={styles.topBarValue}>{player.worldData.resources?.food || 0}</Text>
-            <Text style={styles.topBarLabel}>食物</Text>
-          </View>
+          <Text style={styles.topBarLabel}>食物</Text>
+          <Text style={styles.topBarValue}>{player.worldData.resources?.food || 0}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.topBarItem} onPress={() => setShowPopulationModal(true)}>
           <View style={[styles.topBarIcon, { backgroundColor: '#9C27B0' }]}>
-            <Ionicons name="people" size={18} color="#FFFFFF" />
+            <Ionicons name="people" size={Layout.scale(12)} color="#FFFFFF" />
           </View>
-          <View style={styles.topBarInfo}>
-            <Text style={styles.topBarValue}>{totalPopulation}</Text>
-            <Text style={styles.topBarLabel}>人口</Text>
-          </View>
+          <Text style={styles.topBarLabel}>人口</Text>
+          <Text style={styles.topBarValue}>{totalPopulation}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.topBarItem} onPress={() => setShowStrengthModal(true)}>
           <View style={[styles.topBarIcon, { backgroundColor: '#F44336' }]}>
-            <Ionicons name="shield" size={18} color="#FFFFFF" />
+            <Ionicons name="shield" size={Layout.scale(12)} color="#FFFFFF" />
           </View>
-          <View style={styles.topBarInfo}>
-            <Text style={styles.topBarValue}>{totalStrength}</Text>
-            <Text style={styles.topBarLabel}>战力</Text>
-          </View>
+          <Text style={styles.topBarLabel}>战力</Text>
+          <Text style={styles.topBarValue}>{totalStrength}</Text>
         </TouchableOpacity>
 
         {/* 快捷按钮 */}
         <View style={styles.topBarQuickButtons}>
           <TouchableOpacity style={styles.topBarQuickButton}>
-            <Ionicons name="settings-outline" size={20} color={Colors.text} />
+            <Ionicons name="settings-outline" size={Layout.scale(14)} color={Colors.text} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.topBarQuickButton}>
-            <Ionicons name="mail-outline" size={20} color={Colors.text} />
+            <Ionicons name="mail-outline" size={Layout.scale(14)} color={Colors.text} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.topBarQuickButton}>
-            <Ionicons name="book-outline" size={20} color={Colors.text} />
+            <Ionicons name="book-outline" size={Layout.scale(14)} color={Colors.text} />
           </TouchableOpacity>
         </View>
       </View>
@@ -225,11 +209,11 @@ export default function HomeScreen() {
                   style={[styles.subMenuItem, selectedMenu === item.id && styles.subMenuItemSelected]}
                   onPress={() => handleLeftMenuPress(item.id)}
                 >
-                  <Ionicons name={item.icon as any} size={18} color={selectedMenu === item.id ? Colors.primaryDark : Colors.accent} />
+                  <Ionicons name={item.icon as any} size={Layout.scale(14)} color={selectedMenu === item.id ? Colors.primaryDark : Colors.accent} />
                   <Text style={[styles.subMenuText, selectedMenu === item.id && styles.subMenuTextSelected]}>
                     {item.name}
                   </Text>
-                  {(item.id === 'materials' || item.id === 'weapons' || item.id === 'building') && (
+                  {(item.id === 'equipment' || item.id === 'building') && (
                     <View style={styles.subMenuNotification} />
                   )}
                 </TouchableOpacity>
@@ -242,7 +226,7 @@ export default function HomeScreen() {
             {/* 副本按钮 */}
             <TouchableOpacity style={styles.leftButton}>
               <View style={styles.leftButtonIcon}>
-                <Ionicons name="game-controller" size={24} color={Colors.text} />
+                <Ionicons name="game-controller" size={Layout.scale(18)} color={Colors.text} />
               </View>
               <Text style={styles.leftButtonText}>副本</Text>
             </TouchableOpacity>
@@ -253,7 +237,7 @@ export default function HomeScreen() {
               onPress={() => router.push(`/race/${player.worldData.unlockedRaces[player.worldData.unlockedRaces.length - 1]}`)}
             >
               <View style={styles.leftButtonIcon}>
-                <Ionicons name="people" size={24} color={Colors.text} />
+                <Ionicons name="people" size={Layout.scale(18)} color={Colors.text} />
               </View>
               <Text style={styles.leftButtonText}>种族</Text>
               <View style={styles.leftButtonNotification} />
@@ -265,7 +249,7 @@ export default function HomeScreen() {
               onPress={() => setShowSubMenu(!showSubMenu)}
             >
               <View style={styles.leftButtonIcon}>
-                <Ionicons name="book" size={24} color={Colors.text} />
+                <Ionicons name="book" size={Layout.scale(18)} color={Colors.text} />
               </View>
               <Text style={styles.leftButtonText}>志录</Text>
               <View style={styles.leftButtonNotification} />
@@ -301,12 +285,12 @@ export default function HomeScreen() {
             onPress={() => handleBottomMenuPress(item.id)}
           >
             <View style={styles.bottomMenuIcon}>
-              <Ionicons name={item.icon as any} size={28} color={Colors.accent} />
+              <Ionicons name={item.icon as any} size={Layout.scale(20)} color={Colors.accent} />
             </View>
+            <Text style={styles.bottomMenuText}>{item.name}</Text>
             {item.badge && (
               <Text style={styles.bottomMenuBadge}>{item.badge}</Text>
             )}
-            <Text style={styles.bottomMenuText}>{item.name}</Text>
             {item.hasNotification && (
               <View style={styles.bottomNotification} />
             )}
@@ -326,7 +310,7 @@ export default function HomeScreen() {
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>人口分布</Text>
               <TouchableOpacity onPress={() => setShowPopulationModal(false)}>
-                <Ionicons name="close" size={24} color={Colors.text} />
+                <Ionicons name="close" size={Layout.scale(20)} color={Colors.text} />
               </TouchableOpacity>
             </View>
             <View style={styles.totalPopulationContainer}>
@@ -351,7 +335,7 @@ export default function HomeScreen() {
               {(player.worldData.unlockedTribes ?? []).length > 0 && (
                 <View style={styles.tribesSection}>
                   <View style={styles.tribesSectionHeader}>
-                    <Ionicons name="people" size={16} color={Colors.accent} />
+                    <Ionicons name="people" size={Layout.scale(12)} color={Colors.accent} />
                     <Text style={styles.tribesSectionTitle}>附属部落</Text>
                   </View>
                   {(player.worldData.unlockedTribes ?? []).map((tribe, index) => (
@@ -389,7 +373,7 @@ export default function HomeScreen() {
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>战力构成</Text>
               <TouchableOpacity onPress={() => setShowStrengthModal(false)}>
-                <Ionicons name="close" size={24} color={Colors.text} />
+                <Ionicons name="close" size={Layout.scale(20)} color={Colors.text} />
               </TouchableOpacity>
             </View>
             <View style={styles.totalPopulationContainer}>
@@ -427,7 +411,7 @@ export default function HomeScreen() {
           </Pressable>
         </Pressable>
       </Modal>
-    </SafeAreaView>
+    </ScalableView>
   );
 }
 
@@ -441,11 +425,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 16,
+    gap: Layout.scale(16),
   },
   loadingText: {
     color: Colors.text,
-    fontSize: 16,
+    fontSize: Layout.scale(16),
   },
   backgroundLayer: {
     position: 'absolute',
@@ -459,46 +443,44 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'rgba(74, 44, 145, 0.8)',
-    paddingVertical: 8,
-    paddingHorizontal: 8,
+    paddingVertical: Layout.scale(4),
     borderBottomWidth: 2,
     borderBottomColor: Colors.accent,
   },
   topBarItem: {
-    flexDirection: 'row',
+    flex: 1,
     alignItems: 'center',
-    paddingHorizontal: 6,
-    paddingVertical: 4,
+    minWidth: 0,
   },
   topBarIcon: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: Layout.scale(20),
+    height: Layout.scale(20),
+    borderRadius: Layout.scale(10),
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 6,
-  },
-  topBarInfo: {
-    alignItems: 'center',
-  },
-  topBarValue: {
-    color: Colors.text,
-    fontSize: 14,
-    fontWeight: 'bold',
+    marginBottom: Layout.scale(1),
   },
   topBarLabel: {
     color: Colors.textSecondary,
-    fontSize: 10,
+    fontSize: Layout.scale(8),
+    textAlign: 'center',
+    marginBottom: Layout.scale(1),
+  },
+  topBarValue: {
+    color: Colors.text,
+    fontSize: Layout.scale(10),
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
   topBarQuickButtons: {
     flexDirection: 'row',
     marginLeft: 'auto',
-    gap: 8,
+    gap: Layout.scale(2),
   },
   topBarQuickButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: Layout.scale(26),
+    height: Layout.scale(26),
+    borderRadius: Layout.scale(13),
     backgroundColor: 'rgba(74, 44, 145, 0.9)',
     justifyContent: 'center',
     alignItems: 'center',
@@ -508,29 +490,31 @@ const styles = StyleSheet.create({
   mainContent: {
     flex: 1,
     flexDirection: 'row',
-    marginTop: 8,
+    marginBottom: Layout.scale(4),
   },
   leftMenu: {
-    width: '35%',
-    paddingLeft: 8,
+    width: '30%',
     justifyContent: 'flex-end',
+    paddingRight: Layout.scale(4),
   },
   subMenuContainer: {
     backgroundColor: 'rgba(74, 44, 145, 0.8)',
-    borderRadius: 12,
-    paddingHorizontal: 8,
-    paddingVertical: 6,
-    marginBottom: 8,
+    borderRadius: Layout.borderRadius,
+    paddingHorizontal: Layout.scale(4),
+    paddingVertical: Layout.scale(2),
+    marginBottom: Layout.scale(4),
+    marginRight: Layout.scale(4),
     borderWidth: 2,
     borderColor: Colors.accent,
+    maxHeight: Layout.scale(200),
   },
   subMenuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 6,
-    paddingHorizontal: 8,
-    marginVertical: 2,
-    borderRadius: 8,
+    paddingVertical: Layout.scale(4),
+    paddingHorizontal: Layout.scale(4),
+    marginVertical: Layout.scale(1),
+    borderRadius: Layout.borderRadiusSmall,
     position: 'relative',
   },
   subMenuItemSelected: {
@@ -538,70 +522,69 @@ const styles = StyleSheet.create({
   },
   subMenuText: {
     color: Colors.accent,
-    fontSize: 14,
+    fontSize: Layout.scale(11),
     fontWeight: 'bold',
-    marginLeft: 6,
+    marginLeft: Layout.scale(4),
     flex: 1,
   },
   subMenuTextSelected: {
     color: Colors.primaryDark,
   },
   subMenuNotification: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: Layout.scale(6),
+    height: Layout.scale(6),
+    borderRadius: Layout.scale(3),
     backgroundColor: '#FF4D4D',
     position: 'absolute',
-    top: 6,
-    right: 6,
+    top: Layout.scale(4),
+    right: Layout.scale(4),
   },
   leftButtonsContainer: {
-    gap: 8,
+    gap: Layout.scale(4),
   },
   leftButton: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'rgba(74, 44, 145, 0.7)',
-    borderRadius: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
+    borderRadius: Layout.borderRadius,
+    paddingVertical: Layout.scale(8),
+    paddingHorizontal: Layout.scale(10),
     borderWidth: 2,
     borderColor: '#4A2C91',
     position: 'relative',
   },
   leftButtonIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
+    width: Layout.scale(30),
+    height: Layout.scale(30),
+    borderRadius: Layout.scale(8),
     backgroundColor: 'rgba(0,0,0,0.3)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 10,
+    marginRight: Layout.scale(6),
   },
   leftButtonText: {
     color: Colors.accent,
-    fontSize: 18,
+    fontSize: Layout.scale(14),
     fontWeight: 'bold',
     flex: 1,
   },
   leftButtonNotification: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+    width: Layout.scale(8),
+    height: Layout.scale(8),
+    borderRadius: Layout.scale(4),
     backgroundColor: '#FF4D4D',
     position: 'absolute',
-    top: 10,
-    right: 10,
+    top: Layout.scale(6),
+    right: Layout.scale(6),
   },
   centerArea: {
     flex: 1,
-    paddingHorizontal: 8,
     position: 'relative',
   },
   mapArea: {
     flex: 1,
     backgroundColor: 'rgba(30, 15, 60, 0.5)',
-    borderRadius: 16,
+    borderRadius: Layout.borderRadiusLarge,
     borderWidth: 2,
     borderColor: '#4A2C91',
   },
@@ -612,96 +595,96 @@ const styles = StyleSheet.create({
   },
   mapPlaceholderText: {
     color: Colors.textSecondary,
-    fontSize: 16,
+    fontSize: Layout.scale(14),
   },
   collectButtonArea: {
     position: 'absolute',
-    bottom: 16,
-    right: 16,
+    bottom: Layout.scale(10),
+    right: Layout.scale(10),
     alignItems: 'center',
   },
   collectButton: {
     backgroundColor: 'rgba(74, 44, 145, 0.9)',
-    borderRadius: 20,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
+    borderRadius: Layout.borderRadiusXLarge,
+    paddingVertical: Layout.scale(8),
+    paddingHorizontal: Layout.scale(14),
     borderWidth: 2,
     borderColor: Colors.accent,
   },
   collectButtonText: {
     color: Colors.accent,
-    fontSize: 18,
+    fontSize: Layout.scale(14),
     fontWeight: 'bold',
   },
   collectInfo: {
     color: Colors.text,
-    fontSize: 14,
-    marginTop: 4,
+    fontSize: Layout.scale(10),
+    marginTop: Layout.scale(2),
     backgroundColor: 'rgba(0,0,0,0.5)',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 4,
+    paddingHorizontal: Layout.scale(6),
+    paddingVertical: Layout.scale(1),
+    borderRadius: Layout.borderRadiusSmall,
   },
 
   bottomMenu: {
     flexDirection: 'row',
     backgroundColor: 'rgba(74, 44, 145, 0.9)',
-    paddingVertical: 10,
-    paddingHorizontal: 4,
+    paddingVertical: Layout.scale(4),
+    paddingHorizontal: Layout.scale(4),
     borderTopWidth: 2,
     borderTopColor: Colors.accent,
   },
   bottomMenuItem: {
     flex: 1,
     alignItems: 'center',
-    paddingVertical: 4,
     position: 'relative',
   },
   bottomMenuIcon: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: Layout.scale(28),
+    height: Layout.scale(28),
+    borderRadius: Layout.scale(14),
     backgroundColor: 'rgba(0,0,0,0.3)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 4,
-    borderWidth: 2,
+    marginBottom: Layout.scale(1),
+    borderWidth: 1,
     borderColor: '#4A2C91',
   },
   bottomMenuBadge: {
     position: 'absolute',
     top: 0,
     color: Colors.text,
-    fontSize: 12,
+    fontSize: Layout.scale(9),
     fontWeight: '600',
   },
   bottomMenuText: {
     color: Colors.accent,
-    fontSize: 12,
+    fontSize: Layout.scale(10),
     fontWeight: 'bold',
+    textAlign: 'center',
   },
   bottomNotification: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+    width: Layout.scale(8),
+    height: Layout.scale(8),
+    borderRadius: Layout.scale(4),
     backgroundColor: '#FF4D4D',
     position: 'absolute',
     top: 0,
-    right: 8,
+    right: Layout.scale(5),
   },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: Layout.scale(16),
   },
   modalContent: {
     backgroundColor: Colors.backgroundLight,
-    borderRadius: 16,
-    padding: 20,
+    borderRadius: Layout.borderRadiusLarge,
+    padding: Layout.scale(16),
     width: '100%',
-    maxHeight: '80%',
+    maxHeight: '75%',
     borderWidth: 2,
     borderColor: Colors.accent,
   },
@@ -709,41 +692,41 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: Layout.scale(16),
   },
   modalTitle: {
     color: Colors.accent,
-    fontSize: 24,
+    fontSize: Layout.scale(20),
     fontWeight: 'bold',
   },
   totalPopulationContainer: {
     alignItems: 'center',
-    marginBottom: 20,
-    padding: 20,
+    marginBottom: Layout.scale(16),
+    padding: Layout.scale(16),
     backgroundColor: Colors.card,
-    borderRadius: 12,
+    borderRadius: Layout.borderRadius,
   },
   totalPopulationLabel: {
     color: Colors.textSecondary,
-    fontSize: 14,
-    marginBottom: 8,
+    fontSize: Layout.scale(12),
+    marginBottom: Layout.scale(6),
   },
   totalPopulationValue: {
     color: Colors.accent,
-    fontSize: 36,
+    fontSize: Layout.scale(28),
     fontWeight: 'bold',
   },
   modalList: {
-    maxHeight: 300,
+    maxHeight: Layout.scale(240),
   },
   modalListItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: Colors.card,
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 10,
+    padding: Layout.scale(12),
+    borderRadius: Layout.borderRadius,
+    marginBottom: Layout.scale(8),
     borderLeftWidth: 3,
     borderLeftColor: Colors.accent,
   },
@@ -752,70 +735,70 @@ const styles = StyleSheet.create({
   },
   modalListItemName: {
     color: Colors.text,
-    fontSize: 18,
+    fontSize: Layout.scale(14),
     fontWeight: '600',
-    marginBottom: 4,
+    marginBottom: Layout.scale(2),
   },
   modalListItemValue: {
     alignItems: 'center',
-    marginLeft: 15,
+    marginLeft: Layout.scale(12),
   },
   modalListItemNumber: {
     color: Colors.accent,
-    fontSize: 24,
+    fontSize: Layout.scale(20),
     fontWeight: 'bold',
   },
   modalListItemUnit: {
     color: Colors.textSecondary,
-    fontSize: 14,
+    fontSize: Layout.scale(12),
   },
   tierBadge: {
     backgroundColor: Colors.primaryLight,
-    paddingHorizontal: 10,
-    paddingVertical: 2,
-    borderRadius: 8,
+    paddingHorizontal: Layout.scale(8),
+    paddingVertical: Layout.scale(1),
+    borderRadius: Layout.borderRadiusSmall,
     alignSelf: 'flex-start',
   },
   tierText: {
     color: Colors.accent,
-    fontSize: 12,
+    fontSize: Layout.scale(10),
     fontWeight: 'bold',
   },
   tribeStatusBadge: {
     backgroundColor: Colors.card,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 6,
+    paddingHorizontal: Layout.scale(6),
+    paddingVertical: Layout.scale(1),
+    borderRadius: Layout.borderRadiusSmall,
     alignSelf: 'flex-start',
-    marginTop: 4,
+    marginTop: Layout.scale(2),
   },
   tribeStatusText: {
     color: Colors.accent,
-    fontSize: 11,
+    fontSize: Layout.scale(9),
     fontWeight: '600',
   },
   strengthBreakdown: {
-    marginTop: 6,
+    marginTop: Layout.scale(4),
   },
   strengthBreakdownText: {
     color: Colors.textSecondary,
-    fontSize: 12,
+    fontSize: Layout.scale(10),
   },
   tribesSection: {
-    marginTop: 16,
-    paddingTop: 16,
+    marginTop: Layout.scale(12),
+    paddingTop: Layout.scale(12),
     borderTopWidth: 1,
     borderTopColor: Colors.border.subtle,
   },
   tribesSectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginBottom: 12,
+    gap: Layout.scale(6),
+    marginBottom: Layout.scale(10),
   },
   tribesSectionTitle: {
     color: Colors.accent,
-    fontSize: 16,
+    fontSize: Layout.scale(14),
     fontWeight: 'bold',
   },
 });

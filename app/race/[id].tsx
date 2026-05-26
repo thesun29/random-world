@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, Text, TouchableOpacity, SafeAreaView, ScrollView, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, Text, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useGameStore } from '@/store/useGameStore';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
+import ScalableView from '@/components/ScalableView';
 import { getRaceById, RACES } from '@/utils/races';
 import { TribeData } from '@/types';
 
@@ -101,9 +102,9 @@ export default function RaceDetailScreen() {
 
   if (!race) {
     return (
-      <SafeAreaView style={styles.container}>
+      <ScalableView style={styles.container}>
         <Text style={styles.errorText}>种族不存在</Text>
-      </SafeAreaView>
+      </ScalableView>
     );
   }
 
@@ -155,10 +156,10 @@ export default function RaceDetailScreen() {
     return (
       <View key={tribe.id} style={[styles.tribeItem, { opacity: style.opacity }]}>
         <View style={styles.tribeLeft}>
-          <View style={styles.tribeIconContainer}>
+          <View style={[styles.tribeIconContainer]}>
             <Ionicons 
               name={getTribeIcon(tribe) as any} 
-              size={24} 
+              size={Layout.scale(24)} 
               color={isVassal ? Colors.success : Colors.accent} 
             />
           </View>
@@ -178,11 +179,11 @@ export default function RaceDetailScreen() {
             {tribe.discovered && tribe.status !== 'unknown' && (
               <View style={styles.tribeStats}>
                 <Text style={styles.tribeStat}>
-                  <Ionicons name="people" size={14} color={Colors.textMuted} />
+                  <Ionicons name="people" size={Layout.scale(14)} color={Colors.textMuted} />
                   {' '}{tribe.population}
                 </Text>
                 <Text style={styles.tribeStat}>
-                  <Ionicons name="shield" size={14} color={Colors.textMuted} />
+                  <Ionicons name="shield" size={Layout.scale(14)} color={Colors.textMuted} />
                   {' '}{tribe.strength}
                 </Text>
               </View>
@@ -223,10 +224,10 @@ export default function RaceDetailScreen() {
 
   if (tribes.length === 0) {
     return (
-      <SafeAreaView style={styles.container}>
+      <ScalableView style={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={24} color={Colors.text} />
+            <Ionicons name="arrow-back" size={Layout.scale(24)} color={Colors.text} />
           </TouchableOpacity>
           <Text style={styles.title}>部落列表</Text>
           <View style={styles.placeholder} />
@@ -236,21 +237,21 @@ export default function RaceDetailScreen() {
           <Text style={styles.loadingText}>正在加载部落数据...</Text>
           <Text style={styles.subText}>开始新游戏即可生成部落</Text>
         </View>
-      </SafeAreaView>
+      </ScalableView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <ScalableView style={styles.container} scrollable>
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color={Colors.text} />
+          <Ionicons name="arrow-back" size={Layout.scale(24)} color={Colors.text} />
         </TouchableOpacity>
         <Text style={styles.title}>部落列表 ({tribes.length})</Text>
         <View style={styles.placeholder} />
       </View>
 
-      <ScrollView style={styles.content}>
+      <View style={styles.content}>
         {/* 玩家部落 */}
         {playerTribe && (
           <View style={styles.section}>
@@ -270,8 +271,8 @@ export default function RaceDetailScreen() {
             </View>
           </View>
         )}
-      </ScrollView>
-    </SafeAreaView>
+      </View>
+    </ScalableView>
   );
 }
 
@@ -285,18 +286,18 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: Layout.padding,
-    paddingTop: 10,
+    paddingTop: Layout.scale(10),
   },
   backButton: {
-    padding: 8,
+    padding: Layout.scale(8),
   },
   title: {
     color: Colors.accent,
-    fontSize: 24,
+    fontSize: Layout.fontScale(24),
     fontWeight: 'bold',
   },
   placeholder: {
-    width: 40,
+    width: Layout.scale(40),
   },
   content: {
     flex: 1,
@@ -304,36 +305,36 @@ const styles = StyleSheet.create({
   },
   errorText: {
     color: Colors.text,
-    fontSize: 18,
+    fontSize: Layout.fontScale(18),
     textAlign: 'center',
-    marginTop: 100,
+    marginTop: Layout.scale(100),
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: Layout.scale(20),
   },
   loadingText: {
     color: Colors.text,
-    fontSize: 16,
-    marginTop: 16,
+    fontSize: Layout.fontScale(16),
+    marginTop: Layout.scale(16),
     textAlign: 'center',
   },
   subText: {
     color: Colors.textMuted,
-    fontSize: 14,
-    marginTop: 8,
+    fontSize: Layout.fontScale(14),
+    marginTop: Layout.scale(8),
     textAlign: 'center',
   },
   section: {
-    marginBottom: 24,
+    marginBottom: Layout.scale(24),
   },
   sectionTitle: {
     color: Colors.text,
-    fontSize: 18,
+    fontSize: Layout.fontScale(18),
     fontWeight: 'bold',
-    marginBottom: 12,
+    marginBottom: Layout.scale(12),
   },
   tribeList: {
     backgroundColor: Colors.card,
@@ -344,7 +345,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
+    padding: Layout.scale(16),
     borderBottomWidth: 1,
     borderBottomColor: Colors.primaryLight,
   },
@@ -354,38 +355,38 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   tribeIconContainer: {
-    width: 48,
-    height: 48,
+    width: Layout.scale(48),
+    height: Layout.scale(48),
     backgroundColor: Colors.primaryLight,
-    borderRadius: 24,
+    borderRadius: Layout.scale(24),
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: Layout.scale(12),
   },
   tribeInfo: {
     flex: 1,
   },
   tribeName: {
-    fontSize: 16,
+    fontSize: Layout.fontScale(16),
     fontWeight: 'bold',
-    marginBottom: 4,
+    marginBottom: Layout.scale(4),
   },
   playerTribeTag: {
     color: Colors.accent,
-    fontSize: 12,
+    fontSize: Layout.fontScale(12),
   },
   tribeStats: {
     flexDirection: 'row',
-    gap: 16,
+    gap: Layout.scale(16),
   },
   tribeStat: {
     color: Colors.textMuted,
-    fontSize: 14,
+    fontSize: Layout.fontScale(14),
   },
   statusBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
+    paddingHorizontal: Layout.scale(10),
+    paddingVertical: Layout.scale(4),
+    borderRadius: Layout.scale(12),
     alignSelf: 'flex-start',
   },
   statusBadge_unknown: {
@@ -408,48 +409,48 @@ const styles = StyleSheet.create({
   },
   statusText: {
     color: Colors.text,
-    fontSize: 12,
+    fontSize: Layout.fontScale(12),
     fontWeight: '600',
   },
   vassalContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    marginBottom: 8,
+    gap: Layout.scale(6),
+    marginBottom: Layout.scale(8),
   },
   vassalTitle: {
     color: Colors.text,
-    fontSize: 14,
+    fontSize: Layout.fontScale(14),
   },
   vassalList: {
     backgroundColor: Colors.card,
     borderRadius: Layout.borderRadius,
-    padding: 16,
+    padding: Layout.scale(16),
     ...Layout.shadow,
   },
   vassalName: {
     color: Colors.success,
-    fontSize: 14,
-    marginBottom: 4,
+    fontSize: Layout.fontScale(14),
+    marginBottom: Layout.scale(4),
   },
   overlordText: {
     color: Colors.textMuted,
-    fontSize: 12,
+    fontSize: Layout.fontScale(12),
     fontStyle: 'italic',
-    marginBottom: 4,
+    marginBottom: Layout.scale(4),
   },
   vassalsList: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     alignItems: 'center',
-    marginTop: 4,
+    marginTop: Layout.scale(4),
   },
   vassalsLabel: {
     color: Colors.textMuted,
-    fontSize: 12,
+    fontSize: Layout.fontScale(12),
   },
   vassalTag: {
     color: Colors.success,
-    fontSize: 12,
+    fontSize: Layout.fontScale(12),
   },
 });

@@ -1,10 +1,11 @@
 import React from 'react';
-import { View, StyleSheet, Text, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
+import { View, StyleSheet, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useGameStore } from '@/store/useGameStore';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
+import ScalableView from '@/components/ScalableView';
 
 export default function SettlementScreen() {
   const { player, currentRun } = useGameStore();
@@ -19,7 +20,7 @@ export default function SettlementScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <ScalableView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>{isExtinction ? '探索失败' : '探索完成'}</Text>
       </View>
@@ -27,9 +28,9 @@ export default function SettlementScreen() {
       <ScrollView style={styles.content}>
         <View style={styles.successIcon}>
           {isExtinction ? (
-            <Ionicons name="skull" size={80} color={Colors.error} />
+            <Ionicons name="skull" size={Layout.scale(80)} color={Colors.error} />
           ) : (
-            <Ionicons name="checkmark-circle" size={80} color={Colors.accent} />
+            <Ionicons name="checkmark-circle" size={Layout.scale(80)} color={Colors.accent} />
           )}
         </View>
 
@@ -60,7 +61,7 @@ export default function SettlementScreen() {
               <View style={styles.raceList}>
                 {player.worldData.unlockedRaces.map((raceId, index) => (
                   <View key={index} style={styles.raceItem}>
-                    <Ionicons name="person" size={20} color={Colors.accent} />
+                    <Ionicons name="person" size={Layout.scale(20)} color={Colors.accent} />
                     <Text style={styles.raceName}>{raceId}</Text>
                   </View>
                 ))}
@@ -73,7 +74,7 @@ export default function SettlementScreen() {
                 {player.unlockedSystems.length > 0 ? (
                   player.unlockedSystems.map((systemId, index) => (
                     <View key={index} style={styles.systemItem}>
-                      <Ionicons name="star" size={16} color={Colors.accent} />
+                      <Ionicons name="star" size={Layout.scale(16)} color={Colors.accent} />
                       <Text style={styles.systemName}>
                         {systemId === 'dishes' ? '菜品' :
                          systemId === 'secrets' ? '秘术' :
@@ -105,7 +106,7 @@ export default function SettlementScreen() {
           <Text style={styles.continueButtonText}>继续游戏</Text>
         </TouchableOpacity>
       </View>
-    </SafeAreaView>
+    </ScalableView>
   );
 }
 
@@ -116,11 +117,11 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    paddingTop: 20,
+    paddingTop: Layout.scale(20),
   },
   title: {
     color: Colors.accent,
-    fontSize: 28,
+    fontSize: Layout.fontScale(28),
     fontWeight: 'bold',
   },
   content: {
@@ -129,108 +130,108 @@ const styles = StyleSheet.create({
   },
   successIcon: {
     alignItems: 'center',
-    marginVertical: 30,
+    marginVertical: Layout.scale(30),
   },
   subtitle: {
     color: Colors.text,
-    fontSize: 22,
+    fontSize: Layout.fontScale(22),
     fontWeight: 'bold',
     textAlign: 'center',
-    marginBottom: 30,
+    marginBottom: Layout.scale(30),
   },
   section: {
-    marginBottom: 30,
+    marginBottom: Layout.scale(30),
   },
   sectionTitle: {
     color: Colors.text,
-    fontSize: 20,
+    fontSize: Layout.fontScale(20),
     fontWeight: 'bold',
-    marginBottom: 16,
+    marginBottom: Layout.scale(16),
   },
   resourcesGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
+    gap: Layout.scale(12),
   },
   resourceItem: {
     flex: 1,
     minWidth: '45%',
     backgroundColor: Colors.card,
-    padding: 20,
+    padding: Layout.scale(20),
     borderRadius: Layout.borderRadius,
     alignItems: 'center',
   },
   resourceValue: {
     color: Colors.accent,
-    fontSize: 28,
+    fontSize: Layout.fontScale(28),
     fontWeight: 'bold',
   },
   resourceName: {
     color: Colors.textSecondary,
-    fontSize: 14,
-    marginTop: 8,
+    fontSize: Layout.fontScale(14),
+    marginTop: Layout.scale(8),
   },
   raceList: {
-    gap: 12,
+    gap: Layout.scale(12),
   },
   raceItem: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.card,
-    padding: 16,
+    padding: Layout.scale(16),
     borderRadius: Layout.borderRadius,
-    gap: 12,
+    gap: Layout.scale(12),
   },
   raceName: {
     color: Colors.text,
-    fontSize: 16,
+    fontSize: Layout.fontScale(16),
     fontWeight: '600',
   },
   systemsList: {
-    gap: 12,
+    gap: Layout.scale(12),
   },
   systemItem: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.card,
-    padding: 16,
+    padding: Layout.scale(16),
     borderRadius: Layout.borderRadius,
-    gap: 12,
+    gap: Layout.scale(12),
   },
   systemName: {
     color: Colors.text,
-    fontSize: 16,
+    fontSize: Layout.fontScale(16),
     fontWeight: '600',
   },
   noItems: {
     color: Colors.textMuted,
-    fontSize: 14,
+    fontSize: Layout.fontScale(14),
     textAlign: 'center',
-    padding: 20,
+    padding: Layout.scale(20),
   },
   extinctionInfo: {
     alignItems: 'center',
-    paddingVertical: 30,
+    paddingVertical: Layout.scale(30),
   },
   extinctionText: {
     color: Colors.text,
-    fontSize: 18,
+    fontSize: Layout.fontScale(18),
     textAlign: 'center',
-    marginVertical: 8,
+    marginVertical: Layout.scale(8),
   },
   footer: {
     padding: Layout.padding,
   },
   continueButton: {
     backgroundColor: Colors.accent,
-    paddingVertical: 18,
-    paddingHorizontal: 32,
+    paddingVertical: Layout.scale(18),
+    paddingHorizontal: Layout.scale(32),
     borderRadius: Layout.borderRadius,
     alignItems: 'center',
   },
   continueButtonText: {
     color: Colors.primaryDark,
-    fontSize: 18,
+    fontSize: Layout.fontScale(18),
     fontWeight: 'bold',
   },
 });

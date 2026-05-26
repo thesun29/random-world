@@ -247,7 +247,7 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: Colors.card,
     borderRadius: Layout.borderRadiusLarge,
-    padding: 18,
+    padding: 14,
     marginVertical: 10,
     borderLeftWidth: 4,
     borderLeftColor: Colors.accent,
