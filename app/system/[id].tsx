@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, StyleSheet, Text, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import { View, StyleSheet, Text, TouchableOpacity, Modal, Pressable } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useGameStore } from '@/store/useGameStore';
@@ -19,12 +19,27 @@ const systemInfo = {
 };
 
 const EQUIPMENT_SLOTS = [
-  { id: 'head', name: '头', icon: 'ribbon', count: 1 },
-  { id: 'body', name: '身', icon: 'shirt', count: 1 },
-  { id: 'arm', name: '臂', icon: 'hand-right', count: 2 },
-  { id: 'hand', name: '手', icon: 'hand-left', count: 2 },
-  { id: 'leg', name: '腿', icon: 'walk', count: 2 },
-  { id: 'foot', name: '足', icon: 'footsteps', count: 2 },
+  { id: 'head', name: '头', icon: 'ribbon' },
+  { id: 'body', name: '身', icon: 'shirt' },
+  { id: 'arm_left', name: '左臂', icon: 'hand-right' },
+  { id: 'arm_right', name: '右臂', icon: 'hand-right' },
+  { id: 'hand_left', name: '左手', icon: 'hand-left' },
+  { id: 'hand_right', name: '右手', icon: 'hand-left' },
+  { id: 'leg_left', name: '左腿', icon: 'walk' },
+  { id: 'leg_right', name: '右腿', icon: 'walk' },
+  { id: 'foot_left', name: '左足', icon: 'footsteps' },
+  { id: 'foot_right', name: '右足', icon: 'footsteps' },
+];
+
+const EQUIPMENT_ITEMS = [
+  { id: 'head_1', slot: 'head', name: '精铁头盔', rarity: 'common', icon: 'ribbon' },
+  { id: 'head_2', slot: 'head', name: '灵木冠', rarity: 'rare', icon: 'ribbon' },
+  { id: 'body_1', slot: 'body', name: '皮甲', rarity: 'common', icon: 'shirt' },
+  { id: 'body_2', slot: 'body', name: '锁子甲', rarity: 'rare', icon: 'shirt' },
+  { id: 'arm_left_1', slot: 'arm_left', name: '木盾', rarity: 'common', icon: 'hand-right' },
+  { id: 'hand_left_1', slot: 'hand_left', name: '铁拳套', rarity: 'common', icon: 'hand-left' },
+  { id: 'leg_1', slot: 'leg_left', name: '护腿', rarity: 'common', icon: 'walk' },
+  { id: 'foot_1', slot: 'foot_left', name: '布鞋', rarity: 'common', icon: 'footsteps' },
 ];
 
 export default function SystemDetailScreen() {
@@ -84,19 +99,78 @@ export default function SystemDetailScreen() {
 function EquipmentScreen() {
   const { player } = useGameStore();
   const unlockedRaces = player?.worldData.unlockedRaces || ['ape'];
+  const [equippedItems, setEquippedItems] = useState<Record<string, string>>({});
+  const [showEquipmentModal, setShowEquipmentModal] = useState(false);
+  const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
 
-  const renderEquipmentSlot = (slotType: string, slotName: string, icon: string, index: number = 0) => (
-    <View key={`${slotType}-${index}`} style={styles.equipmentSlot}>
-      <View style={styles.slotIcon}>
-        <Ionicons name={icon as any} size={Layout.scale(28)} color={Colors.accent} />
-      </View>
-      <Text style={styles.slotName}>{slotName}{index > 0 ? `${index + 1}` : ''}</Text>
-      <View style={styles.slotPlaceholder}>
-        <Ionicons name="add-circle-outline" size={Layout.scale(32)} color={Colors.textMuted} />
-        <Text style={styles.slotPlaceholderText}>未装备</Text>
-      </View>
-    </View>
-  );
+  const handleSlotPress = (slotId: string) => {
+    setSelectedSlot(slotId);
+    setShowEquipmentModal(true);
+  };
+
+  const handleEquipItem = (itemId: string) => {
+    if (selectedSlot) {
+      setEquippedItems(prev => ({
+        ...prev,
+        [selectedSlot]: itemId
+      }));
+      setShowEquipmentModal(false);
+      setSelectedSlot(null);
+    }
+  };
+
+  const handleUnequip = () => {
+    if (selectedSlot) {
+      setEquippedItems(prev => {
+        const newItems = { ...prev };
+        delete newItems[selectedSlot];
+        return newItems;
+      });
+      setShowEquipmentModal(false);
+      setSelectedSlot(null);
+    }
+  };
+
+  const getRarityColor = (rarity: string) => {
+    switch (rarity) {
+      case 'rare': return '#FFD700';
+      case 'epic': return '#9400D3';
+      case 'legendary': return '#FF4500';
+      default: return Colors.accent;
+    }
+  };
+
+  const renderEquipmentSlot = (slot: typeof EQUIPMENT_SLOTS[0]) => {
+    const equippedItemId = equippedItems[slot.id];
+    const equippedItem = equippedItemId ? EQUIPMENT_ITEMS.find(item => item.id === equippedItemId) : null;
+    
+    return (
+      <TouchableOpacity 
+        key={slot.id} 
+        style={styles.equipmentSlot}
+        onPress={() => handleSlotPress(slot.id)}
+      >
+        <View style={styles.slotIcon}>
+          <Ionicons 
+            name={slot.icon as any} 
+            size={Layout.scale(32)} 
+            color={Colors.accent} 
+          />
+        </View>
+        <Text style={styles.slotName}>{slot.name}</Text>
+        
+        {equippedItem ? (
+          <View style={[styles.equippedBadge, { backgroundColor: getRarityColor(equippedItem.rarity) }]}>
+            <Ionicons name={equippedItem.icon as any} size={Layout.scale(20)} color="#FFFFFF" />
+          </View>
+        ) : (
+          <View style={styles.emptySlotOverlay}>
+            <Ionicons name={slot.icon as any} size={Layout.scale(24)} color="rgba(255,255,255,0.2)" />
+          </View>
+        )}
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <ScalableView>
@@ -108,10 +182,10 @@ function EquipmentScreen() {
         <View style={styles.placeholder} />
       </View>
 
-      <ScrollView style={styles.content}>
+      <View style={styles.content}>
         <View style={styles.infoSection}>
-          <Ionicons name="construct" size={Layout.scale(60)} color={Colors.accent} />
-          <Text style={styles.description}>为你的种族打造强力的装备，提升整体战力。每个种族有10个装备栏位。</Text>
+          <Ionicons name="construct" size={Layout.scale(32)} color={Colors.accent} />
+          <Text style={styles.description}>打造强力装备，提升种族战力</Text>
         </View>
 
         {unlockedRaces.map((raceId) => {
@@ -122,7 +196,7 @@ function EquipmentScreen() {
             <View key={raceId} style={styles.raceSection}>
               <View style={styles.raceHeader}>
                 <View style={styles.raceIcon}>
-                  <Ionicons name="people" size={Layout.scale(28)} color={Colors.accent} />
+                  <Ionicons name="people" size={Layout.scale(24)} color={Colors.accent} />
                 </View>
                 <View style={styles.raceInfo}>
                   <Text style={styles.raceName}>{race.name}</Text>
@@ -130,41 +204,68 @@ function EquipmentScreen() {
                 </View>
               </View>
 
-              <View style={styles.equipmentLayout}>
-                <View style={styles.equipmentRow}>
-                  <View style={styles.armSlot} />
-                  {renderEquipmentSlot('head', '头', 'ribbon')}
-                  <View style={styles.armSlot} />
-                </View>
-
-                <View style={styles.equipmentRow}>
-                  {renderEquipmentSlot('arm', '臂', 'hand-right', 0)}
-                  {renderEquipmentSlot('body', '身', 'shirt')}
-                  {renderEquipmentSlot('arm', '臂', 'hand-right', 1)}
-                </View>
-
-                <View style={styles.equipmentRow}>
-                  {renderEquipmentSlot('hand', '手', 'hand-left', 0)}
-                  <View style={styles.armSlot} />
-                  {renderEquipmentSlot('hand', '手', 'hand-left', 1)}
-                </View>
-
-                <View style={styles.equipmentRow}>
-                  {renderEquipmentSlot('leg', '腿', 'walk', 0)}
-                  <View style={styles.armSlot} />
-                  {renderEquipmentSlot('leg', '腿', 'walk', 1)}
-                </View>
-
-                <View style={styles.equipmentRow}>
-                  {renderEquipmentSlot('foot', '足', 'footsteps', 0)}
-                  <View style={styles.armSlot} />
-                  {renderEquipmentSlot('foot', '足', 'footsteps', 1)}
-                </View>
+              <View style={styles.equipmentGrid}>
+                {EQUIPMENT_SLOTS.map(renderEquipmentSlot)}
               </View>
             </View>
           );
         })}
-      </ScrollView>
+      </View>
+
+      {/* 装备选择弹窗 */}
+      <Modal
+        visible={showEquipmentModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowEquipmentModal(false)}
+      >
+        <Pressable style={styles.modalOverlay} onPress={() => setShowEquipmentModal(false)}>
+          <Pressable style={styles.modalContent} onPress={() => {}}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>
+                选择装备 - {selectedSlot ? EQUIPMENT_SLOTS.find(s => s.id === selectedSlot)?.name : ''}
+              </Text>
+              <TouchableOpacity onPress={() => setShowEquipmentModal(false)}>
+                <Ionicons name="close" size={Layout.scale(24)} color={Colors.text} />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.equipmentList}>
+              {EQUIPMENT_ITEMS
+                .filter(item => item.slot === selectedSlot?.replace('_left', '').replace('_right', ''))
+                .map((item) => (
+                  <TouchableOpacity 
+                    key={item.id} 
+                    style={styles.equipmentItem}
+                    onPress={() => handleEquipItem(item.id)}
+                  >
+                    <View style={[styles.itemIcon, { backgroundColor: getRarityColor(item.rarity) }]}>
+                      <Ionicons name={item.icon as any} size={Layout.scale(24)} color="#FFFFFF" />
+                    </View>
+                    <View style={styles.itemInfo}>
+                      <Text style={[styles.itemName, { color: getRarityColor(item.rarity) }]}>
+                        {item.name}
+                      </Text>
+                      <Text style={styles.itemRarity}>
+                        {item.rarity === 'common' ? '普通' : item.rarity === 'rare' ? '稀有' : item.rarity === 'epic' ? '史诗' : '传说'}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              
+              {equippedItems[selectedSlot || ''] && (
+                <TouchableOpacity 
+                  style={styles.unequipButton}
+                  onPress={handleUnequip}
+                >
+                  <Ionicons name="trash-outline" size={Layout.scale(24)} color="#FF4D4D" />
+                  <Text style={styles.unequipText}>卸下装备</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </ScalableView>
   );
 }
@@ -179,14 +280,14 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: Layout.padding,
-    paddingTop: Layout.scale(10),
+    paddingVertical: Layout.scale(8),
   },
   backButton: {
     padding: Layout.scale(8),
   },
   title: {
     color: Colors.accent,
-    fontSize: Layout.fontScale(24),
+    fontSize: Layout.fontScale(20),
     fontWeight: 'bold',
   },
   placeholder: {
@@ -194,22 +295,21 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: Layout.padding,
+    paddingHorizontal: Layout.padding,
   },
   infoSection: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: Layout.scale(32),
-    padding: Layout.scale(24),
+    marginBottom: Layout.scale(12),
+    padding: Layout.scale(12),
     backgroundColor: Colors.card,
     borderRadius: Layout.borderRadius,
-    ...Layout.shadow,
+    gap: Layout.scale(12),
   },
   description: {
     color: Colors.text,
-    fontSize: Layout.fontScale(16),
-    textAlign: 'center',
-    marginTop: Layout.scale(16),
-    lineHeight: Layout.fontScale(24),
+    fontSize: Layout.fontScale(14),
+    flex: 1,
   },
   lockedNotice: {
     flexDirection: 'row',
@@ -226,9 +326,9 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     color: Colors.text,
-    fontSize: Layout.fontScale(20),
+    fontSize: Layout.fontScale(18),
     fontWeight: 'bold',
-    marginBottom: Layout.scale(16),
+    marginBottom: Layout.scale(12),
   },
   itemsGrid: {
     flexDirection: 'row',
@@ -257,30 +357,100 @@ const styles = StyleSheet.create({
   itemNameLocked: {
     color: Colors.textMuted,
   },
-  equipmentSlot: {
+  
+  // 装备页面样式
+  raceSection: {
     backgroundColor: Colors.card,
     borderRadius: Layout.borderRadius,
     padding: Layout.scale(12),
-    alignItems: 'center',
-    width: Layout.scale(100),
-    marginBottom: Layout.scale(8),
-    borderWidth: Layout.scale(1),
-    borderColor: Colors.border.subtle,
+    marginBottom: Layout.scale(12),
+    ...Layout.shadow,
   },
-  slotIcon: {
-    width: Layout.scale(50),
-    height: Layout.scale(50),
+  raceHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: Layout.scale(12),
+    paddingBottom: Layout.scale(8),
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border.subtle,
+  },
+  raceIcon: {
+    width: Layout.scale(44),
+    height: Layout.scale(44),
     borderRadius: Layout.borderRadiusLarge,
     backgroundColor: Colors.primaryLight,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: Layout.scale(8),
+    marginRight: Layout.scale(10),
+  },
+  raceInfo: {
+    flex: 1,
+  },
+  raceName: {
+    color: Colors.text,
+    fontSize: Layout.fontScale(16),
+    fontWeight: 'bold',
+    marginBottom: Layout.scale(2),
+  },
+  raceTier: {
+    color: Colors.accent,
+    fontSize: Layout.fontScale(12),
+    fontWeight: '600',
+  },
+  equipmentGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-around',
+    gap: Layout.scale(8),
+  },
+  equipmentSlot: {
+    width: Layout.scale(80),
+    height: Layout.scale(80),
+    backgroundColor: Colors.primaryLight,
+    borderRadius: Layout.borderRadius,
+    padding: Layout.scale(6),
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: Colors.border.subtle,
+    position: 'relative',
+  },
+  slotIcon: {
+    width: Layout.scale(36),
+    height: Layout.scale(36),
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: Layout.scale(2),
   },
   slotName: {
     color: Colors.text,
-    fontSize: Layout.fontScale(14),
-    fontWeight: 'bold',
-    marginBottom: Layout.scale(8),
+    fontSize: Layout.fontScale(11),
+    fontWeight: '600',
+    position: 'absolute',
+    bottom: Layout.scale(4),
+  },
+  emptySlotOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: Layout.borderRadius,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  equippedBadge: {
+    position: 'absolute',
+    top: -Layout.scale(6),
+    right: -Layout.scale(6),
+    width: Layout.scale(24),
+    height: Layout.scale(24),
+    borderRadius: Layout.scale(12),
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: Colors.background,
   },
   slotPlaceholder: {
     alignItems: 'center',
@@ -288,59 +458,87 @@ const styles = StyleSheet.create({
   },
   slotPlaceholderText: {
     color: Colors.textMuted,
-    fontSize: Layout.fontScale(12),
+    fontSize: Layout.fontScale(11),
     marginTop: Layout.scale(4),
   },
-  raceSection: {
-    backgroundColor: Colors.card,
-    borderRadius: Layout.borderRadius,
-    padding: Layout.scale(16),
-    marginBottom: Layout.scale(16),
-    ...Layout.shadow,
+  armSlot: {
+    width: Layout.scale(80),
   },
-  raceHeader: {
+  
+  // 弹窗样式
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: Colors.backgroundLight,
+    borderTopLeftRadius: Layout.borderRadiusXLarge,
+    borderTopRightRadius: Layout.borderRadiusXLarge,
+    padding: Layout.scale(20),
+    maxHeight: '60%',
+  },
+  modalHeader: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: Layout.scale(16),
     paddingBottom: Layout.scale(12),
-    borderBottomWidth: Layout.scale(1),
-    borderBottomColor: Colors.border.subtle,
+    borderBottomWidth: 2,
+    borderBottomColor: Colors.accent,
   },
-  raceIcon: {
-    width: Layout.scale(56),
-    height: Layout.scale(56),
-    borderRadius: Layout.borderRadiusLarge,
-    backgroundColor: Colors.primaryLight,
+  modalTitle: {
+    color: Colors.accent,
+    fontSize: Layout.fontScale(18),
+    fontWeight: 'bold',
+  },
+  equipmentList: {
+    gap: Layout.scale(8),
+  },
+  equipmentItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.card,
+    borderRadius: Layout.borderRadius,
+    padding: Layout.scale(12),
+    gap: Layout.scale(12),
+    borderWidth: 1,
+    borderColor: Colors.border.subtle,
+  },
+  itemIcon: {
+    width: Layout.scale(48),
+    height: Layout.scale(48),
+    borderRadius: Layout.borderRadius,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: Layout.scale(12),
   },
-  raceInfo: {
+  itemInfo: {
     flex: 1,
   },
-  raceName: {
-    color: Colors.text,
-    fontSize: Layout.fontScale(20),
+  itemName: {
+    fontSize: Layout.fontScale(16),
     fontWeight: 'bold',
     marginBottom: Layout.scale(4),
   },
-  raceTier: {
-    color: Colors.accent,
+  itemRarity: {
+    color: Colors.textSecondary,
+    fontSize: Layout.fontScale(12),
+  },
+  unequipButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.card,
+    borderRadius: Layout.borderRadius,
+    padding: Layout.scale(14),
+    gap: Layout.scale(8),
+    marginTop: Layout.scale(8),
+    borderWidth: 1,
+    borderColor: '#FF4D4D',
+  },
+  unequipText: {
+    color: '#FF4D4D',
     fontSize: Layout.fontScale(14),
     fontWeight: '600',
-  },
-  equipmentLayout: {
-    alignItems: 'center',
-    paddingVertical: Layout.scale(8),
-  },
-  equipmentRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: Layout.scale(12),
-    marginBottom: Layout.scale(12),
-  },
-  armSlot: {
-    width: Layout.scale(100),
   },
 });
