@@ -5,7 +5,33 @@
       "description": "每次修改完代码之后自动重启游戏服务",
       "trigger": "afterCodeChange",
       "action": "restartService"
+    },
+    "conversationRestart": {
+      "enabled": true,
+      "description": "每执行完一轮对话后重启游戏服务器",
+      "trigger": "afterConversation",
+      "action": "restartService"
+    },
+    "globalMemory": {
+      "enabled": true,
+      "description": "启用全局记忆功能，保存对话上下文和游戏状态",
+      "memoryScope": "project",
+      "persistAcrossSessions": true
     }
   },
-  "note": "这条规则已被记录，将在每次代码修改后自动触发服务重启"
+  "globalMemory": {
+    "gameState": {
+      "serverStatus": "stopped",
+      "lastRestart": null,
+      "activeTerminal": null
+    },
+    "conversationHistory": [],
+    "projectContext": {
+      "projectName": "randomWorld",
+      "projectType": "React Native Expo Game",
+      "description": "随机世界文字肉鸽生存游戏",
+      "techStack": ["React Native", "Expo", "TypeScript", "Zustand"]
+    }
+  },
+  "note": "Trae全局记忆已启用，每轮对话后将自动重启游戏服务器"
 }

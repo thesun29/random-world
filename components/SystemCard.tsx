@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
+import GufengIcon from './GufengIcons';
 
 interface SystemCardProps {
   id: string;
@@ -29,10 +29,9 @@ export default function SystemCard({
       activeOpacity={unlocked ? 0.7 : 1}
     >
       <View style={[styles.iconContainer, !unlocked && styles.lockedIconContainer]}>
-        <Ionicons 
-          name={unlocked ? (icon as any) : 'lock-closed'} 
-          size={32} 
-          color={unlocked ? Colors.accent : Colors.textMuted} 
+        <GufengIcon 
+          name={unlocked ? icon : 'lock-closed'} 
+          size={34} 
         />
       </View>
       <Text style={[styles.name, !unlocked && styles.lockedText]}>{name}</Text>
@@ -41,12 +40,12 @@ export default function SystemCard({
       </Text>
       {unlocked && (
         <View style={styles.unlockedBadge}>
-          <Ionicons name="checkmark-circle" size={16} color={Colors.success} />
+          <GufengIcon name="checkmark-circle" size={18} />
         </View>
       )}
       {!unlocked && (
         <View style={styles.lockOverlay}>
-          <Ionicons name="lock-closed" size={24} color={Colors.textMuted} />
+          <GufengIcon name="lock-closed" size={28} />
         </View>
       )}
     </TouchableOpacity>
@@ -63,7 +62,7 @@ const styles = StyleSheet.create({
     ...Colors.shadow.card,
     position: 'relative',
     aspectRatio: 1,
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: Colors.border.subtle,
     minHeight: 120,
   },
@@ -71,14 +70,14 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   iconContainer: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: Colors.primaryLight,
+    width: 60,
+    height: 60,
+    borderRadius: Layout.borderRadius,
+    backgroundColor: Colors.backgroundLight,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 8,
-    borderWidth: 2,
+    marginBottom: 10,
+    borderWidth: 3,
     borderColor: Colors.border.accent,
   },
   lockedIconContainer: {
@@ -103,12 +102,12 @@ const styles = StyleSheet.create({
   },
   unlockedBadge: {
     position: 'absolute',
-    top: 8,
-    right: 8,
+    top: 10,
+    right: 10,
   },
   lockOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: Colors.overlay.medium,
     borderRadius: Layout.borderRadiusLarge,
     justifyContent: 'center',
     alignItems: 'center',

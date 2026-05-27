@@ -1,13 +1,13 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { View, StyleSheet, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { router } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 import { useGameStore } from '@/store/useGameStore';
 import ProgressBar from '@/components/ProgressBar';
 import NotepadEvent from '@/components/NotepadEvent';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import ScalableView from '@/components/ScalableView';
+import GufengIcon from '@/components/GufengIcons';
 import { generateEventByProgress } from '@/utils/events';
 import { getRaceById } from '@/utils/races';
 import { GameEvent, EventHistoryItem } from '@/types';
@@ -149,13 +149,13 @@ export default function ExploreScreen() {
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
           <View style={styles.backButtonIcon}>
-            <Ionicons name="arrow-back" size={Layout.scale(22)} color={Colors.text} />
+            <GufengIcon name="arrow-back" size={Layout.scale(22)} />
           </View>
         </TouchableOpacity>
         <View style={styles.headerCenter}>
           <Text style={styles.title}>探索中</Text>
           <View style={styles.raceStatusBadge}>
-            <Ionicons name="people" size={Layout.scale(12)} color={Colors.accent} />
+            <GufengIcon name="people" size={Layout.scale(14)} />
             <Text style={styles.raceStatus}>
               {currentRace?.name || '未开化猿人'}
             </Text>
@@ -174,7 +174,7 @@ export default function ExploreScreen() {
         {/* 人口 */}
         <View key="population" style={styles.resourceItem}>
           <View style={styles.resourceIconContainer}>
-            <Ionicons name="people" size={Layout.scale(18)} color={Colors.accent} />
+            <GufengIcon name="people" size={Layout.scale(20)} />
           </View>
           <Text style={styles.resourceValue}>{currentRun.population ?? 0}</Text>
           <Text style={styles.resourceKey}>人口</Text>
@@ -182,7 +182,7 @@ export default function ExploreScreen() {
         {/* 战力 */}
         <View key="strength" style={styles.resourceItem}>
           <View style={styles.resourceIconContainer}>
-            <Ionicons name="shield-checkmark" size={Layout.scale(18)} color={Colors.accent} />
+            <GufengIcon name="shield" size={Layout.scale(20)} />
           </View>
           <Text style={styles.resourceValue}>{currentRun.totalStrength ?? 0}</Text>
           <Text style={styles.resourceKey}>战力</Text>
@@ -190,10 +190,9 @@ export default function ExploreScreen() {
         {Object.entries(currentRun.inventory ?? {}).map(([key, value]) => (
           <View key={key} style={styles.resourceItem}>
             <View style={styles.resourceIconContainer}>
-              <Ionicons 
-                name={key === 'food' ? 'restaurant' : key === 'water' ? 'water' : key === 'wood' ? 'leaf' : 'cube'} 
-                size={Layout.scale(18)} 
-                color={Colors.accent} 
+              <GufengIcon 
+                name={key === 'food' ? 'food' : key === 'water' ? 'water' : key === 'wood' ? 'wood' : 'stone'} 
+                size={Layout.scale(20)} 
               />
             </View>
             <Text style={styles.resourceValue}>
@@ -209,7 +208,7 @@ export default function ExploreScreen() {
         {/* 开始标记 */}
         <View style={styles.startMarker}>
           <View style={styles.startMarkerIcon}>
-            <Ionicons name="play-circle" size={Layout.scale(28)} color={Colors.accent} />
+            <GufengIcon name="play-circle" size={Layout.scale(30)} />
           </View>
           <Text style={styles.startText}>探索开始</Text>
           <View style={styles.startMarkerLine} />
@@ -240,7 +239,7 @@ export default function ExploreScreen() {
             {currentRun?.population <= 0 ? (
               <>
                 <View style={styles.completeIconContainer}>
-                  <Ionicons name="skull" size={Layout.scale(56)} color={Colors.error} />
+                  <GufengIcon name="skull" size={Layout.scale(58)} />
                 </View>
                 <Text style={[styles.completeTitle, { color: Colors.error }]}>族群灭亡！</Text>
                 <Text style={styles.completeSubtitle}>所有族人都已死亡...</Text>
@@ -248,7 +247,7 @@ export default function ExploreScreen() {
             ) : (
               <>
                 <View style={styles.completeIconContainer}>
-                  <Ionicons name="trophy" size={Layout.scale(56)} color={Colors.accent} />
+                  <GufengIcon name="trophy" size={Layout.scale(58)} />
                 </View>
                 <Text style={styles.completeTitle}>探索完成！</Text>
                 <Text style={styles.completeSubtitle}>恭喜你完成了本次探索</Text>
@@ -256,7 +255,7 @@ export default function ExploreScreen() {
             )}
             <TouchableOpacity style={styles.completeButton} onPress={handleComplete}>
               <Text style={styles.completeButtonText}>查看结果</Text>
-              <Ionicons name="arrow-forward" size={Layout.scale(20)} color={Colors.primaryDark} />
+              <GufengIcon name="arrow-forward" size={Layout.scale(22)} />
             </TouchableOpacity>
           </View>
         )}
@@ -278,38 +277,45 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: Layout.padding,
-    paddingTop: Layout.scale(10),
-    paddingBottom: Layout.scale(10),
+    paddingTop: Layout.scale(12),
+    paddingBottom: Layout.scale(12),
+    backgroundColor: Colors.backgroundLight,
+    borderBottomWidth: 2,
+    borderBottomColor: Colors.accent,
   },
   backButton: {
     padding: Layout.scale(4),
   },
   backButtonIcon: {
-    width: Layout.scale(40),
-    height: Layout.scale(40),
-    borderRadius: Layout.borderRadiusXLarge,
+    width: Layout.scale(44),
+    height: Layout.scale(44),
+    borderRadius: Layout.borderRadius,
     backgroundColor: Colors.card,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 2,
+    borderColor: Colors.border.subtle,
     ...Colors.shadow.card,
   },
   headerCenter: {
     alignItems: 'center',
-    gap: Layout.scale(4),
+    gap: Layout.scale(6),
   },
   title: {
     color: Colors.accent,
-    fontSize: Layout.fontScale(22),
+    fontSize: Layout.fontScale(24),
     fontWeight: 'bold',
   },
   raceStatusBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.primaryLight,
-    paddingHorizontal: Layout.scale(10),
-    paddingVertical: Layout.scale(4),
+    backgroundColor: Colors.card,
+    paddingHorizontal: Layout.scale(12),
+    paddingVertical: Layout.scale(6),
     borderRadius: Layout.borderRadius,
-    gap: Layout.scale(4),
+    gap: Layout.scale(6),
+    borderWidth: 1,
+    borderColor: Colors.border.subtle,
   },
   raceStatus: {
     color: Colors.accent,
@@ -317,35 +323,36 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   placeholder: {
-    width: Layout.scale(40),
+    width: Layout.scale(44),
   },
   progressSection: {
     paddingHorizontal: Layout.padding,
-    marginBottom: Layout.scale(12),
+    paddingTop: Layout.scale(12),
+    marginBottom: Layout.scale(16),
   },
   resourcesBar: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     paddingHorizontal: Layout.padding,
-    gap: Layout.scale(8),
-    marginBottom: Layout.scale(12),
+    gap: Layout.scale(10),
+    marginBottom: Layout.scale(16),
   },
   resourceItem: {
     alignItems: 'center',
     backgroundColor: Colors.card,
-    paddingHorizontal: Layout.scale(14),
-    paddingVertical: Layout.scale(8),
+    paddingHorizontal: Layout.scale(16),
+    paddingVertical: Layout.scale(10),
     borderRadius: Layout.borderRadius,
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: Colors.border.subtle,
-    gap: Layout.scale(4),
+    gap: Layout.scale(6),
   },
   resourceIconContainer: {
     marginBottom: Layout.scale(2),
   },
   resourceValue: {
     color: Colors.accent,
-    fontSize: Layout.fontScale(16),
+    fontSize: Layout.fontScale(18),
     fontWeight: 'bold',
   },
   resourceKey: {
@@ -363,17 +370,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: Layout.scale(24),
-    gap: Layout.scale(12),
+    paddingVertical: Layout.scale(28),
+    gap: Layout.scale(16),
   },
   startMarkerIcon: {
-    width: Layout.scale(48),
-    height: Layout.scale(48),
-    borderRadius: Layout.borderRadiusXLarge,
-    backgroundColor: Colors.primaryLight,
+    width: Layout.scale(52),
+    height: Layout.scale(52),
+    borderRadius: Layout.borderRadius,
+    backgroundColor: Colors.backgroundLight,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: Layout.scale(2),
+    borderWidth: 3,
     borderColor: Colors.accent,
   },
   startText: {
@@ -382,30 +389,30 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   startMarkerLine: {
-    width: Layout.scale(40),
+    width: Layout.scale(48),
     height: Layout.scale(2),
     backgroundColor: Colors.border.subtle,
   },
   completeSection: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: Layout.scale(48),
-    gap: Layout.scale(20),
+    paddingVertical: Layout.scale(56),
+    gap: Layout.scale(24),
   },
   completeIconContainer: {
-    width: Layout.scale(100),
-    height: Layout.scale(100),
-    borderRadius: Layout.scale(50),
+    width: Layout.scale(108),
+    height: Layout.scale(108),
+    borderRadius: Layout.borderRadiusLarge,
     backgroundColor: Colors.card,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: Layout.scale(3),
+    borderWidth: 3,
     borderColor: Colors.accent,
     ...Colors.shadow.glow,
   },
   completeTitle: {
     color: Colors.accent,
-    fontSize: Layout.fontScale(28),
+    fontSize: Layout.fontScale(30),
     fontWeight: 'bold',
   },
   completeSubtitle: {
@@ -416,8 +423,8 @@ const styles = StyleSheet.create({
   completeButton: {
     flexDirection: 'row',
     backgroundColor: Colors.accent,
-    paddingVertical: Layout.scale(16),
-    paddingHorizontal: Layout.scale(32),
+    paddingVertical: Layout.scale(18),
+    paddingHorizontal: Layout.scale(36),
     borderRadius: Layout.borderRadiusLarge,
     alignItems: 'center',
     gap: Layout.scale(10),

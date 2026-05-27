@@ -69,3 +69,7 @@ web-build
 
 # typescript
 *.tsbuildinfo
+
+# Trae 记忆文件
+.trae/memory/
+.trae/*.local.json

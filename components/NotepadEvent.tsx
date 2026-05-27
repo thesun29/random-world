@@ -1,9 +1,9 @@
 import React from 'react';
 import { View, StyleSheet, Text, TouchableOpacity, Animated } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { GameEvent, EventHistoryItem } from '@/types';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
+import GufengIcon from './GufengIcons';
 
 interface NotepadEventProps {
   event: GameEvent;
@@ -53,7 +53,7 @@ const NotepadEvent: React.FC<NotepadEventProps> = ({
         </View>
         {!isCurrent && historyItem && (
           <View style={styles.completedBadge}>
-            <Ionicons name="checkmark-circle" size={18} color={Colors.success} />
+            <GufengIcon name="checkmark-circle" size={18} />
           </View>
         )}
       </View>
@@ -67,13 +67,13 @@ const NotepadEvent: React.FC<NotepadEventProps> = ({
         <View style={styles.historyContent}>
           <View style={styles.choiceSelected}>
             <View style={styles.choiceArrow}>
-              <Ionicons name="arrow-forward" size={16} color={Colors.accent} />
+              <GufengIcon name="arrow-forward" size={16} />
             </View>
             <Text style={styles.choiceText}>你选择了: {historyItem.selectedChoiceText}</Text>
           </View>
           <View style={styles.resultBox}>
             <View style={styles.resultIcon}>
-              <Ionicons name="chatbubble-ellipses" size={16} color={Colors.accent} />
+              <GufengIcon name="mail" size={16} />
             </View>
             <Text style={styles.resultText}>{historyItem.resultText}</Text>
           </View>
@@ -82,16 +82,15 @@ const NotepadEvent: React.FC<NotepadEventProps> = ({
           {Object.keys(historyItem.resourcesGained).length > 0 && (
             <View style={styles.gainedResourcesContainer}>
               <View style={styles.gainedResourcesHeader}>
-                <Ionicons name="gift" size={16} color={Colors.accent} />
+                <GufengIcon name="gift" size={16} />
                 <Text style={styles.gainedResourcesTitle}>获得资源</Text>
               </View>
               <View style={styles.gainedResourcesList}>
                 {Object.entries(historyItem.resourcesGained).map(([key, value]) => (
                   <View key={key} style={styles.gainedResourceItem}>
-                    <Ionicons 
+                    <GufengIcon 
                       name={getResourceIcon(key)} 
                       size={16} 
-                      color={Colors.accent} 
                     />
                     <Text style={styles.gainedResourceText}>
                       +{value} {getFriendlyResourceName(key)}
@@ -105,7 +104,7 @@ const NotepadEvent: React.FC<NotepadEventProps> = ({
           {/* 获得的进度 */}
           {historyItem.progressGained > 0 && (
             <View style={styles.progressGainedContainer}>
-              <Ionicons name="trending-up" size={16} color={Colors.info} />
+              <GufengIcon name="star" size={16} />
               <Text style={styles.progressGainedText}>
                 探索进度 +{historyItem.progressGained}%
               </Text>
@@ -115,7 +114,7 @@ const NotepadEvent: React.FC<NotepadEventProps> = ({
           {/* 解锁的系统 */}
           {historyItem.systemUnlocked && historyItem.systemUnlocked.length > 0 && (
             <View style={styles.systemUnlockedContainer}>
-              <Ionicons name="key" size={16} color={Colors.success} />
+              <GufengIcon name="key" size={16} />
               <Text style={styles.systemUnlockedText}>
                 解锁系统: {historyItem.systemUnlocked.map(sys => getFriendlySystemName(sys)).join(', ')}
               </Text>
@@ -125,7 +124,7 @@ const NotepadEvent: React.FC<NotepadEventProps> = ({
           {/* 种族进化 */}
           {historyItem.raceEvolved && (
             <View style={styles.raceEvolvedContainer}>
-              <Ionicons name="trophy" size={16} color={Colors.accent} />
+              <GufengIcon name="trophy" size={16} />
               <Text style={styles.raceEvolvedText}>
                 种族进化: {getFriendlyRaceName(historyItem.raceEvolved)}
               </Text>
@@ -135,10 +134,9 @@ const NotepadEvent: React.FC<NotepadEventProps> = ({
           {/* 人口变化 */}
           {historyItem.populationChange !== undefined && historyItem.populationChange !== 0 && (
             <View style={styles.populationChangeContainer}>
-              <Ionicons 
+              <GufengIcon 
                 name="people" 
                 size={16} 
-                color={(historyItem.populationChange ?? 0) > 0 ? Colors.success : Colors.error} 
               />
               <Text style={[
                 styles.populationChangeText, 
@@ -152,10 +150,9 @@ const NotepadEvent: React.FC<NotepadEventProps> = ({
           {/* 战力变化 */}
           {historyItem.strengthChange !== undefined && historyItem.strengthChange !== 0 && (
             <View style={styles.strengthChangeContainer}>
-              <Ionicons 
-                name="shield-checkmark" 
+              <GufengIcon 
+                name="shield" 
                 size={16} 
-                color={(historyItem.strengthChange ?? 0) > 0 ? Colors.success : Colors.error} 
               />
               <Text style={[
                 styles.strengthChangeText, 
@@ -181,10 +178,9 @@ const NotepadEvent: React.FC<NotepadEventProps> = ({
                 activeOpacity={0.7}
               >
                 <View style={styles.choiceIconContainer}>
-                  <Ionicons 
-                    name={hasSingleChoice ? "arrow-forward-circle" : "radio-button-off"} 
+                  <GufengIcon 
+                    name={hasSingleChoice ? "arrow-forward" : "star"} 
                     size={20} 
-                    color={Colors.accent} 
                   />
                 </View>
                 <Text style={styles.choiceButtonText}>{choice.text}</Text>
@@ -198,14 +194,14 @@ const NotepadEvent: React.FC<NotepadEventProps> = ({
 };
 
 // 辅助函数：获取资源图标
-const getResourceIcon = (key: string): keyof typeof Ionicons.glyphMap => {
-  const iconMap: { [key: string]: keyof typeof Ionicons.glyphMap } = {
-    food: 'restaurant',
+const getResourceIcon = (key: string): string => {
+  const iconMap: { [key: string]: string } = {
+    food: 'food',
     water: 'water',
-    wood: 'leaf',
-    stone: 'cube',
+    wood: 'wood',
+    stone: 'stone',
   };
-  return iconMap[key] || 'ellipse';
+  return iconMap[key] || 'star';
 };
 
 // 辅助函数：友好的资源名称
@@ -251,7 +247,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     borderLeftWidth: 4,
     borderLeftColor: Colors.accent,
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: Colors.border.subtle,
     ...Colors.shadow.card,
   },
@@ -300,12 +296,14 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   choiceArrow: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: Colors.primaryLight,
+    width: 28,
+    height: 28,
+    borderRadius: Layout.borderRadiusSmall,
+    backgroundColor: Colors.backgroundLight,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Colors.border.subtle,
   },
   choiceText: {
     color: Colors.accent,
@@ -314,13 +312,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   resultBox: {
-    backgroundColor: Colors.primaryDark,
+    backgroundColor: Colors.backgroundLight,
     padding: 14,
     borderRadius: Layout.borderRadiusSmall,
     marginBottom: 14,
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: 10,
+    borderWidth: 1,
+    borderColor: Colors.border.subtle,
   },
   resultIcon: {
     marginTop: 2,
@@ -334,9 +334,11 @@ const styles = StyleSheet.create({
   },
   gainedResourcesContainer: {
     marginBottom: 12,
-    backgroundColor: Colors.primaryLight,
+    backgroundColor: Colors.backgroundLight,
     padding: 12,
     borderRadius: Layout.borderRadiusSmall,
+    borderWidth: 1,
+    borderColor: Colors.border.subtle,
   },
   gainedResourcesHeader: {
     flexDirection: 'row',
@@ -369,6 +371,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.info + '15',
     padding: 10,
     borderRadius: Layout.borderRadiusSmall,
+    borderWidth: 1,
+    borderColor: Colors.border.subtle,
   },
   progressGainedText: {
     color: Colors.info,
@@ -383,6 +387,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.success + '15',
     padding: 10,
     borderRadius: Layout.borderRadiusSmall,
+    borderWidth: 1,
+    borderColor: Colors.border.subtle,
   },
   systemUnlockedText: {
     color: Colors.success,
@@ -398,6 +404,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.accent + '15',
     padding: 10,
     borderRadius: Layout.borderRadiusSmall,
+    borderWidth: 1,
+    borderColor: Colors.border.subtle,
   },
   raceEvolvedText: {
     color: Colors.accent,
@@ -410,9 +418,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 10,
     gap: 8,
-    backgroundColor: Colors.primaryLight,
+    backgroundColor: Colors.backgroundLight,
     padding: 10,
     borderRadius: Layout.borderRadiusSmall,
+    borderWidth: 1,
+    borderColor: Colors.border.subtle,
   },
   populationChangeText: {
     fontSize: 14,
@@ -422,9 +432,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: Colors.primaryLight,
+    backgroundColor: Colors.backgroundLight,
     padding: 10,
     borderRadius: Layout.borderRadiusSmall,
+    borderWidth: 1,
+    borderColor: Colors.border.subtle,
   },
   strengthChangeText: {
     fontSize: 14,
@@ -437,21 +449,23 @@ const styles = StyleSheet.create({
   choiceButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.primaryLight,
+    backgroundColor: Colors.backgroundLight,
     paddingVertical: 14,
     paddingHorizontal: 16,
     borderRadius: Layout.borderRadius,
     gap: 12,
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: Colors.border.subtle,
   },
   choiceIconContainer: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: Colors.primaryDark,
+    width: 36,
+    height: 36,
+    borderRadius: Layout.borderRadiusSmall,
+    backgroundColor: Colors.card,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Colors.border.subtle,
   },
   singleChoiceButton: {
     borderColor: Colors.accent,

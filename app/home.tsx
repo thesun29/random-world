@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Text, TouchableOpacity, Modal, Pressable, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, Text, TouchableOpacity, Modal, Pressable, ActivityIndicator, ScrollView } from 'react-native';
 import { router } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 import { useGameStore } from '@/store/useGameStore';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import ScalableView from '@/components/ScalableView';
+import GufengIcon from '@/components/GufengIcons';
 import { getRaceById, RACES } from '@/utils/races';
 
 // 左侧系统菜单
@@ -127,56 +127,56 @@ export default function HomeScreen() {
       {/* 顶部横向资源栏 */}
       <View style={styles.topBar}>
         <TouchableOpacity style={styles.topBarItem}>
-          <View style={[styles.topBarIcon, { backgroundColor: '#8D6E63' }]}>
-            <Ionicons name="cube" size={Layout.scale(12)} color="#FFFFFF" />
+          <View style={[styles.topBarIcon, { backgroundColor: '#8B7355' }]}>
+            <GufengIcon name="stone" size={Layout.scale(14)} />
           </View>
           <Text style={styles.topBarLabel}>石头</Text>
           <Text style={styles.topBarValue}>{player.worldData.resources?.stone || 0}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.topBarItem}>
-          <View style={[styles.topBarIcon, { backgroundColor: '#795548' }]}>
-            <Ionicons name="leaf" size={Layout.scale(12)} color="#FFFFFF" />
+          <View style={[styles.topBarIcon, { backgroundColor: '#A0522D' }]}>
+            <GufengIcon name="wood" size={Layout.scale(14)} />
           </View>
           <Text style={styles.topBarLabel}>木材</Text>
           <Text style={styles.topBarValue}>{player.worldData.resources?.wood || 0}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.topBarItem}>
-          <View style={[styles.topBarIcon, { backgroundColor: '#4CAF50' }]}>
-            <Ionicons name="flask" size={Layout.scale(12)} color="#FFFFFF" />
+          <View style={[styles.topBarIcon, { backgroundColor: '#228B22' }]}>
+            <GufengIcon name="herb" size={Layout.scale(14)} />
           </View>
           <Text style={styles.topBarLabel}>草药</Text>
           <Text style={styles.topBarValue}>0</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.topBarItem}>
-          <View style={[styles.topBarIcon, { backgroundColor: '#2196F3' }]}>
-            <Ionicons name="water" size={Layout.scale(12)} color="#FFFFFF" />
+          <View style={[styles.topBarIcon, { backgroundColor: '#4682B4' }]}>
+            <GufengIcon name="water" size={Layout.scale(14)} />
           </View>
           <Text style={styles.topBarLabel}>水</Text>
           <Text style={styles.topBarValue}>{player.worldData.resources?.water || 0}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.topBarItem}>
-          <View style={[styles.topBarIcon, { backgroundColor: '#FF9800' }]}>
-            <Ionicons name="restaurant" size={Layout.scale(12)} color="#FFFFFF" />
+          <View style={[styles.topBarIcon, { backgroundColor: '#DAA520' }]}>
+            <GufengIcon name="food" size={Layout.scale(14)} />
           </View>
           <Text style={styles.topBarLabel}>食物</Text>
           <Text style={styles.topBarValue}>{player.worldData.resources?.food || 0}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.topBarItem} onPress={() => setShowPopulationModal(true)}>
-          <View style={[styles.topBarIcon, { backgroundColor: '#9C27B0' }]}>
-            <Ionicons name="people" size={Layout.scale(12)} color="#FFFFFF" />
+          <View style={[styles.topBarIcon, { backgroundColor: '#8B0000' }]}>
+            <GufengIcon name="people" size={Layout.scale(14)} />
           </View>
           <Text style={styles.topBarLabel}>人口</Text>
           <Text style={styles.topBarValue}>{totalPopulation}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.topBarItem} onPress={() => setShowStrengthModal(true)}>
-          <View style={[styles.topBarIcon, { backgroundColor: '#F44336' }]}>
-            <Ionicons name="shield" size={Layout.scale(12)} color="#FFFFFF" />
+          <View style={[styles.topBarIcon, { backgroundColor: '#CD5C5C' }]}>
+            <GufengIcon name="shield" size={Layout.scale(14)} />
           </View>
           <Text style={styles.topBarLabel}>战力</Text>
           <Text style={styles.topBarValue}>{totalStrength}</Text>
@@ -185,13 +185,13 @@ export default function HomeScreen() {
         {/* 快捷按钮 */}
         <View style={styles.topBarQuickButtons}>
           <TouchableOpacity style={styles.topBarQuickButton}>
-            <Ionicons name="settings-outline" size={Layout.scale(14)} color={Colors.text} />
+            <GufengIcon name="settings" size={Layout.scale(16)} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.topBarQuickButton}>
-            <Ionicons name="mail-outline" size={Layout.scale(14)} color={Colors.text} />
+            <GufengIcon name="mail" size={Layout.scale(16)} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.topBarQuickButton}>
-            <Ionicons name="book-outline" size={Layout.scale(14)} color={Colors.text} />
+            <GufengIcon name="book" size={Layout.scale(16)} />
           </TouchableOpacity>
         </View>
       </View>
@@ -203,21 +203,23 @@ export default function HomeScreen() {
           {/* 子菜单 - 点击志录后显示 */}
           {showSubMenu && (
             <View style={styles.subMenuContainer}>
-              {leftMenuItems.map((item, index) => (
-                <TouchableOpacity
-                  key={item.id}
-                  style={[styles.subMenuItem, selectedMenu === item.id && styles.subMenuItemSelected]}
-                  onPress={() => handleLeftMenuPress(item.id)}
-                >
-                  <Ionicons name={item.icon as any} size={Layout.scale(14)} color={selectedMenu === item.id ? Colors.primaryDark : Colors.accent} />
-                  <Text style={[styles.subMenuText, selectedMenu === item.id && styles.subMenuTextSelected]}>
-                    {item.name}
-                  </Text>
-                  {(item.id === 'equipment' || item.id === 'building') && (
-                    <View style={styles.subMenuNotification} />
-                  )}
-                </TouchableOpacity>
-              ))}
+              <ScrollView style={styles.subMenuScroll} showsVerticalScrollIndicator={false}>
+                {leftMenuItems.map((item, index) => (
+                  <TouchableOpacity
+                    key={item.id}
+                    style={[styles.subMenuItem, selectedMenu === item.id && styles.subMenuItemSelected]}
+                    onPress={() => handleLeftMenuPress(item.id)}
+                  >
+                    <GufengIcon name={item.icon as any} size={Layout.scale(16)} />
+                    <Text style={[styles.subMenuText, selectedMenu === item.id && styles.subMenuTextSelected]}>
+                      {item.name}
+                    </Text>
+                    {(item.id === 'equipment' || item.id === 'building') && (
+                      <View style={styles.subMenuNotification} />
+                    )}
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
             </View>
           )}
           
@@ -226,7 +228,7 @@ export default function HomeScreen() {
             {/* 副本按钮 */}
             <TouchableOpacity style={styles.leftButton}>
               <View style={styles.leftButtonIcon}>
-                <Ionicons name="game-controller" size={Layout.scale(18)} color={Colors.text} />
+                <GufengIcon name="sword" size={Layout.scale(20)} />
               </View>
               <Text style={styles.leftButtonText}>副本</Text>
             </TouchableOpacity>
@@ -237,7 +239,7 @@ export default function HomeScreen() {
               onPress={() => router.push(`/race/${player.worldData.unlockedRaces[player.worldData.unlockedRaces.length - 1]}`)}
             >
               <View style={styles.leftButtonIcon}>
-                <Ionicons name="people" size={Layout.scale(18)} color={Colors.text} />
+                <GufengIcon name="people" size={Layout.scale(20)} />
               </View>
               <Text style={styles.leftButtonText}>种族</Text>
               <View style={styles.leftButtonNotification} />
@@ -249,7 +251,7 @@ export default function HomeScreen() {
               onPress={() => setShowSubMenu(!showSubMenu)}
             >
               <View style={styles.leftButtonIcon}>
-                <Ionicons name="book" size={Layout.scale(18)} color={Colors.text} />
+                <GufengIcon name="book" size={Layout.scale(20)} />
               </View>
               <Text style={styles.leftButtonText}>志录</Text>
               <View style={styles.leftButtonNotification} />
@@ -285,7 +287,7 @@ export default function HomeScreen() {
             onPress={() => handleBottomMenuPress(item.id)}
           >
             <View style={styles.bottomMenuIcon}>
-              <Ionicons name={item.icon as any} size={Layout.scale(20)} color={Colors.accent} />
+              <GufengIcon name={item.icon as any} size={Layout.scale(22)} />
             </View>
             <Text style={styles.bottomMenuText}>{item.name}</Text>
             {item.badge && (
@@ -310,7 +312,7 @@ export default function HomeScreen() {
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>人口分布</Text>
               <TouchableOpacity onPress={() => setShowPopulationModal(false)}>
-                <Ionicons name="close" size={Layout.scale(20)} color={Colors.text} />
+                <Text style={{ fontSize: Layout.scale(20), color: Colors.text, fontWeight: 'bold' }}>×</Text>
               </TouchableOpacity>
             </View>
             <View style={styles.totalPopulationContainer}>
@@ -335,7 +337,7 @@ export default function HomeScreen() {
               {(player.worldData.unlockedTribes ?? []).length > 0 && (
                 <View style={styles.tribesSection}>
                   <View style={styles.tribesSectionHeader}>
-                    <Ionicons name="people" size={Layout.scale(12)} color={Colors.accent} />
+                    <GufengIcon name="people" size={Layout.scale(14)} />
                     <Text style={styles.tribesSectionTitle}>附属部落</Text>
                   </View>
                   {(player.worldData.unlockedTribes ?? []).map((tribe, index) => (
@@ -373,7 +375,7 @@ export default function HomeScreen() {
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>战力构成</Text>
               <TouchableOpacity onPress={() => setShowStrengthModal(false)}>
-                <Ionicons name="close" size={Layout.scale(20)} color={Colors.text} />
+                <Text style={{ fontSize: Layout.scale(20), color: Colors.text, fontWeight: 'bold' }}>×</Text>
               </TouchableOpacity>
             </View>
             <View style={styles.totalPopulationContainer}>
@@ -418,7 +420,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1a0a2e',
+    backgroundColor: Colors.background,
     position: 'relative',
   },
   loadingContainer: {
@@ -437,14 +439,14 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: '#1a0a2e',
+    backgroundColor: Colors.background,
   },
   topBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(74, 44, 145, 0.8)',
-    paddingVertical: Layout.scale(4),
-    borderBottomWidth: 2,
+    backgroundColor: Colors.backgroundLight,
+    paddingVertical: Layout.scale(6),
+    borderBottomWidth: 3,
     borderBottomColor: Colors.accent,
   },
   topBarItem: {
@@ -453,12 +455,14 @@ const styles = StyleSheet.create({
     minWidth: 0,
   },
   topBarIcon: {
-    width: Layout.scale(20),
-    height: Layout.scale(20),
-    borderRadius: Layout.scale(10),
+    width: Layout.scale(24),
+    height: Layout.scale(24),
+    borderRadius: Layout.scale(4),
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: Layout.scale(1),
+    marginBottom: Layout.scale(2),
+    borderWidth: 1,
+    borderColor: Colors.border.subtle,
   },
   topBarLabel: {
     color: Colors.textSecondary,
@@ -475,17 +479,18 @@ const styles = StyleSheet.create({
   topBarQuickButtons: {
     flexDirection: 'row',
     marginLeft: 'auto',
-    gap: Layout.scale(2),
+    gap: Layout.scale(4),
+    paddingRight: Layout.scale(4),
   },
   topBarQuickButton: {
-    width: Layout.scale(26),
-    height: Layout.scale(26),
-    borderRadius: Layout.scale(13),
-    backgroundColor: 'rgba(74, 44, 145, 0.9)',
+    width: Layout.scale(30),
+    height: Layout.scale(30),
+    borderRadius: Layout.scale(4),
+    backgroundColor: Colors.card,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#4A2C91',
+    borderColor: Colors.border.subtle,
   },
   mainContent: {
     flex: 1,
@@ -495,25 +500,32 @@ const styles = StyleSheet.create({
   leftMenu: {
     width: '30%',
     justifyContent: 'flex-end',
-    paddingRight: Layout.scale(4),
+    paddingRight: Layout.scale(6),
   },
   subMenuContainer: {
-    backgroundColor: 'rgba(74, 44, 145, 0.8)',
+    backgroundColor: Colors.card,
     borderRadius: Layout.borderRadius,
-    paddingHorizontal: Layout.scale(4),
-    paddingVertical: Layout.scale(2),
-    marginBottom: Layout.scale(4),
-    marginRight: Layout.scale(4),
+    paddingHorizontal: Layout.scale(6),
+    paddingVertical: Layout.scale(4),
+    marginBottom: Layout.scale(6),
+    marginRight: Layout.scale(6),
     borderWidth: 2,
     borderColor: Colors.accent,
-    maxHeight: Layout.scale(200),
+    maxHeight: Layout.scale(280),
+    shadowColor: Colors.accent,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+  subMenuScroll: {
+    maxHeight: Layout.scale(270),
   },
   subMenuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: Layout.scale(4),
-    paddingHorizontal: Layout.scale(4),
-    marginVertical: Layout.scale(1),
+    paddingVertical: Layout.scale(6),
+    paddingHorizontal: Layout.scale(6),
+    marginVertical: Layout.scale(2),
     borderRadius: Layout.borderRadiusSmall,
     position: 'relative',
   },
@@ -524,7 +536,7 @@ const styles = StyleSheet.create({
     color: Colors.accent,
     fontSize: Layout.scale(11),
     fontWeight: 'bold',
-    marginLeft: Layout.scale(4),
+    marginLeft: Layout.scale(6),
     flex: 1,
   },
   subMenuTextSelected: {
@@ -533,34 +545,40 @@ const styles = StyleSheet.create({
   subMenuNotification: {
     width: Layout.scale(6),
     height: Layout.scale(6),
-    borderRadius: Layout.scale(3),
-    backgroundColor: '#FF4D4D',
+    borderRadius: Layout.scale(1),
+    backgroundColor: Colors.danger,
     position: 'absolute',
     top: Layout.scale(4),
     right: Layout.scale(4),
   },
   leftButtonsContainer: {
-    gap: Layout.scale(4),
+    gap: Layout.scale(6),
   },
   leftButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(74, 44, 145, 0.7)',
+    backgroundColor: Colors.card,
     borderRadius: Layout.borderRadius,
-    paddingVertical: Layout.scale(8),
-    paddingHorizontal: Layout.scale(10),
+    paddingVertical: Layout.scale(10),
+    paddingHorizontal: Layout.scale(12),
     borderWidth: 2,
-    borderColor: '#4A2C91',
+    borderColor: Colors.border.subtle,
     position: 'relative',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
   leftButtonIcon: {
-    width: Layout.scale(30),
-    height: Layout.scale(30),
-    borderRadius: Layout.scale(8),
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    width: Layout.scale(34),
+    height: Layout.scale(34),
+    borderRadius: Layout.scale(4),
+    backgroundColor: Colors.backgroundLight,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: Layout.scale(6),
+    marginRight: Layout.scale(8),
+    borderWidth: 1,
+    borderColor: Colors.border.subtle,
   },
   leftButtonText: {
     color: Colors.accent,
@@ -571,8 +589,8 @@ const styles = StyleSheet.create({
   leftButtonNotification: {
     width: Layout.scale(8),
     height: Layout.scale(8),
-    borderRadius: Layout.scale(4),
-    backgroundColor: '#FF4D4D',
+    borderRadius: Layout.scale(1),
+    backgroundColor: Colors.danger,
     position: 'absolute',
     top: Layout.scale(6),
     right: Layout.scale(6),
@@ -583,10 +601,10 @@ const styles = StyleSheet.create({
   },
   mapArea: {
     flex: 1,
-    backgroundColor: 'rgba(30, 15, 60, 0.5)',
+    backgroundColor: Colors.backgroundLight,
     borderRadius: Layout.borderRadiusLarge,
-    borderWidth: 2,
-    borderColor: '#4A2C91',
+    borderWidth: 3,
+    borderColor: Colors.border.subtle,
   },
   mapPlaceholder: {
     flex: 1,
@@ -595,21 +613,25 @@ const styles = StyleSheet.create({
   },
   mapPlaceholderText: {
     color: Colors.textSecondary,
-    fontSize: Layout.scale(14),
+    fontSize: Layout.scale(16),
   },
   collectButtonArea: {
     position: 'absolute',
-    bottom: Layout.scale(10),
-    right: Layout.scale(10),
+    bottom: Layout.scale(12),
+    right: Layout.scale(12),
     alignItems: 'center',
   },
   collectButton: {
-    backgroundColor: 'rgba(74, 44, 145, 0.9)',
-    borderRadius: Layout.borderRadiusXLarge,
-    paddingVertical: Layout.scale(8),
-    paddingHorizontal: Layout.scale(14),
+    backgroundColor: Colors.card,
+    borderRadius: Layout.borderRadius,
+    paddingVertical: Layout.scale(10),
+    paddingHorizontal: Layout.scale(16),
     borderWidth: 2,
     borderColor: Colors.accent,
+    shadowColor: Colors.accent,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
   },
   collectButtonText: {
     color: Colors.accent,
@@ -619,19 +641,21 @@ const styles = StyleSheet.create({
   collectInfo: {
     color: Colors.text,
     fontSize: Layout.scale(10),
-    marginTop: Layout.scale(2),
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    paddingHorizontal: Layout.scale(6),
-    paddingVertical: Layout.scale(1),
+    marginTop: Layout.scale(4),
+    backgroundColor: Colors.overlay.medium,
+    paddingHorizontal: Layout.scale(8),
+    paddingVertical: Layout.scale(2),
     borderRadius: Layout.borderRadiusSmall,
+    borderWidth: 1,
+    borderColor: Colors.border.subtle,
   },
 
   bottomMenu: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(74, 44, 145, 0.9)',
-    paddingVertical: Layout.scale(4),
+    backgroundColor: Colors.backgroundLight,
+    paddingVertical: Layout.scale(6),
     paddingHorizontal: Layout.scale(4),
-    borderTopWidth: 2,
+    borderTopWidth: 3,
     borderTopColor: Colors.accent,
   },
   bottomMenuItem: {
@@ -640,15 +664,15 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   bottomMenuIcon: {
-    width: Layout.scale(28),
-    height: Layout.scale(28),
-    borderRadius: Layout.scale(14),
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    width: Layout.scale(32),
+    height: Layout.scale(32),
+    borderRadius: Layout.scale(4),
+    backgroundColor: Colors.backgroundLight,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: Layout.scale(1),
+    marginBottom: Layout.scale(2),
     borderWidth: 1,
-    borderColor: '#4A2C91',
+    borderColor: Colors.border.subtle,
   },
   bottomMenuBadge: {
     position: 'absolute',
@@ -666,33 +690,40 @@ const styles = StyleSheet.create({
   bottomNotification: {
     width: Layout.scale(8),
     height: Layout.scale(8),
-    borderRadius: Layout.scale(4),
-    backgroundColor: '#FF4D4D',
+    borderRadius: Layout.scale(1),
+    backgroundColor: Colors.danger,
     position: 'absolute',
     top: 0,
     right: Layout.scale(5),
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    backgroundColor: Colors.overlay.medium,
     justifyContent: 'center',
     alignItems: 'center',
     padding: Layout.scale(16),
   },
   modalContent: {
-    backgroundColor: Colors.backgroundLight,
+    backgroundColor: Colors.card,
     borderRadius: Layout.borderRadiusLarge,
-    padding: Layout.scale(16),
+    padding: Layout.scale(20),
     width: '100%',
     maxHeight: '75%',
-    borderWidth: 2,
+    borderWidth: 3,
     borderColor: Colors.accent,
+    shadowColor: Colors.accent,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: Layout.scale(16),
+    paddingBottom: Layout.scale(8),
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border.subtle,
   },
   modalTitle: {
     color: Colors.accent,
@@ -703,8 +734,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: Layout.scale(16),
     padding: Layout.scale(16),
-    backgroundColor: Colors.card,
+    backgroundColor: Colors.backgroundLight,
     borderRadius: Layout.borderRadius,
+    borderWidth: 1,
+    borderColor: Colors.border.subtle,
   },
   totalPopulationLabel: {
     color: Colors.textSecondary,

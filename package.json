@@ -8,7 +8,10 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "test": "jest --watchAll",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "restart-server": "node .trae/scripts/restart-server.js",
+    "clear-memory": "rmdir /s /q .trae\\memory 2>nul || mkdir .trae\\memory",
+    "view-memory": "echo \"=== 服务器状态 ===\" && type .trae\\memory\\server-state.json 2>nul || echo \"无状态数据\" && echo. && echo \"=== 会话信息 ===\" && type .trae\\memory\\session.json 2>nul || echo \"无会话数据\""
   },
   "jest": {
     "preset": "jest-expo"

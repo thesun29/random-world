@@ -1,0 +1,49 @@
+{
+  "version": "1.1",
+  "memory": {
+    "enabled": true,
+    "storage": {
+      "type": "local",
+      "path": ".trae/memory"
+    },
+    "retention": {
+      "conversationHistory": 100,
+      "sessionData": "permanent"
+    }
+  },
+  "serviceManagement": {
+    "commands": {
+      "start": "npm start",
+      "stop": "taskkill /F /IM node.exe",
+      "restart": "node .trae/scripts/restart-server.js",
+      "checkStatus": "netstat -ano | findstr :8081"
+    },
+    "port": 8081,
+    "refreshNotifierPort": 8082,
+    "autoRestart": true,
+    "refreshBrowserOnRestart": true
+  },
+  "browserRefresh": {
+    "enabled": true,
+    "autoRefresh": true,
+    "refreshDelay": 2000,
+    "checkInterval": 3000,
+    "methods": [
+      "auto_detect",
+      "f5_key",
+      "location_reload"
+    ]
+  },
+  "projectTracking": {
+    "files": [
+      "package.json",
+      "app.json",
+      "app/**/*.tsx",
+      "app/**/*.ts",
+      "components/**/*.tsx",
+      "utils/**/*.ts",
+      "store/**/*.ts"
+    ],
+    "watchMode": true
+  }
+}
