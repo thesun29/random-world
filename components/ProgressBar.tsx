@@ -24,25 +24,34 @@ export default function ProgressBar({
     <View style={styles.container}>
       <View style={styles.labelContainer}>
         <View style={styles.labelLeft}>
-          <Ionicons name="compass" size={16} color={Colors.accent} />
+          <Ionicons name="compass" size={14} color={Colors.accent} />
           <Text style={styles.label}>探索进度</Text>
         </View>
-        {showText && (
-          <View style={styles.percentageContainer}>
-            <Text style={styles.percentageText}>{Math.round(percentage)}%</Text>
+      </View>
+      <View style={[styles.progressBarContainer, { height: height + 20 }]}>
+        <View style={[styles.background, { height }]}>
+          <View style={[styles.fillContainer, { height }]}>
+            <View style={[styles.fill, { width: `${percentage}%`, height }]} />
+            <View style={[styles.fillGlow, { width: `${percentage}%`, height }]} />
+          </View>
+          <View style={styles.markers}>
+            {[...Array(10)].map((_, index) => (
+              <View key={index} style={styles.marker} />
+            ))}
+          </View>
+        </View>
+        {percentage > 0 && percentage < 100 && (
+          <View style={[styles.bubble, { left: `${percentage}%` }]}>
+            <Text style={styles.bubbleText}>{Math.round(percentage)}%</Text>
+            <View style={styles.bubbleArrow} />
           </View>
         )}
-      </View>
-      <View style={[styles.background, { height }]}>
-        <View style={[styles.fillContainer, { height }]}>
-          <View style={[styles.fill, { width: `${percentage}%`, height }]} />
-          <View style={[styles.fillGlow, { width: `${percentage}%`, height }]} />
-        </View>
-        <View style={styles.markers}>
-          {[...Array(10)].map((_, index) => (
-            <View key={index} style={styles.marker} />
-          ))}
-        </View>
+        {percentage >= 100 && (
+          <View style={[styles.bubble, styles.bubbleComplete, { left: `${percentage}%` }]}>
+            <Text style={styles.bubbleText}>{Math.round(percentage)}%</Text>
+            <View style={styles.bubbleArrow} />
+          </View>
+        )}
       </View>
     </View>
   );
@@ -56,30 +65,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 4,
   },
   labelLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 4,
   },
   label: {
     color: Colors.textSecondary,
-    fontSize: 13,
+    fontSize: 11,
     fontWeight: '600',
   },
-  percentageContainer: {
-    backgroundColor: Colors.primaryLight,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.accent,
-  },
-  percentageText: {
-    color: Colors.accent,
-    fontSize: 14,
-    fontWeight: 'bold',
+  progressBarContainer: {
+    width: '100%',
+    position: 'relative',
+    justifyContent: 'center',
   },
   background: {
     width: '100%',
@@ -122,5 +123,40 @@ const styles = StyleSheet.create({
     height: '100%',
     backgroundColor: Colors.primaryDark,
     opacity: 0.5,
+  },
+  bubble: {
+    position: 'absolute',
+    top: -8,
+    transform: [{ translateX: -20 }],
+    backgroundColor: Colors.accent,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+    alignItems: 'center',
+    zIndex: 10,
+    borderWidth: 1,
+    borderColor: Colors.primaryDark,
+  },
+  bubbleComplete: {
+    backgroundColor: Colors.success,
+  },
+  bubbleText: {
+    color: Colors.primaryDark,
+    fontSize: 10,
+    fontWeight: 'bold',
+  },
+  bubbleArrow: {
+    position: 'absolute',
+    bottom: -4,
+    width: 0,
+    height: 0,
+    backgroundColor: 'transparent',
+    borderStyle: 'solid',
+    borderLeftWidth: 4,
+    borderRightWidth: 4,
+    borderTopWidth: 4,
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderTopColor: Colors.accent,
   },
 });

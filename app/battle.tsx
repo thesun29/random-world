@@ -166,19 +166,18 @@ export default function BattleScreen() {
   return (
     <ScalableView 
       style={styles.container} 
-      scrollable={true}
-      contentContainerStyle={styles.content}
+      scrollable={false}
     >
+      <View style={styles.content}>
       <View style={styles.titleContainer}>
         <Text style={styles.title}>⚔️ 部落遭遇战 ⚔️</Text>
-        <View style={styles.titleDecoration} />
       </View>
       
       <View style={styles.combatantsContainer}>
         <View style={styles.combatantBox}>
           <View style={styles.combatantHeader}>
             <View style={styles.combatantIcon}>
-              <Ionicons name="people" size={Layout.scale(24)} color={Colors.accent} />
+              <Ionicons name="people" size={Layout.scale(18)} color={Colors.accent} />
             </View>
             <Text style={styles.combatantTitle}>我方部落</Text>
           </View>
@@ -206,7 +205,7 @@ export default function BattleScreen() {
         <View style={[styles.combatantBox, styles.enemyBox]}>
           <View style={styles.combatantHeader}>
             <View style={[styles.combatantIcon, styles.enemyIcon]}>
-              <Ionicons name="people" size={Layout.scale(24)} color={Colors.error} />
+              <Ionicons name="people" size={Layout.scale(18)} color={Colors.error} />
             </View>
             <Text style={styles.combatantTitle}>{enemyTribe.name}</Text>
           </View>
@@ -241,18 +240,14 @@ export default function BattleScreen() {
                 router.back();
               }}
             >
-              <View style={styles.buttonIcon}>
-                <Ionicons name="arrow-back" size={Layout.scale(20)} color={Colors.text} />
-              </View>
+              <Ionicons name="arrow-back" size={Layout.scale(14)} color={Colors.text} />
               <Text style={styles.battleButtonText}>撤退</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.battleButton, styles.primaryButton]}
               onPress={startBattle}
             >
-              <View style={styles.buttonIcon}>
-                <Ionicons name="flame" size={Layout.scale(20)} color={Colors.primaryDark} />
-              </View>
+              <Ionicons name="flame" size={Layout.scale(14)} color={Colors.primaryDark} />
               <Text style={[styles.battleButtonText, styles.primaryButtonText]}>开战！</Text>
             </TouchableOpacity>
           </View>
@@ -262,12 +257,10 @@ export default function BattleScreen() {
       {battlePhase === 'fighting' && (
         <View style={styles.phaseContainer}>
           <View style={styles.fightingIconContainer}>
-            <Ionicons name="flash" size={Layout.scale(64)} color={Colors.accent} />
+            <Ionicons name="flash" size={Layout.scale(48)} color={Colors.accent} />
           </View>
           <Text style={styles.fightingText}>⚔️ 战斗中... ⚔️</Text>
-          <View style={styles.fightingAnimation}>
-            <Ionicons name="hourglass" size={Layout.scale(40)} color={Colors.accent} />
-          </View>
+          <Ionicons name="hourglass" size={Layout.scale(28)} color={Colors.accent} />
         </View>
       )}
       
@@ -276,7 +269,7 @@ export default function BattleScreen() {
           <View style={[styles.resultIconContainer, battleResult.victory ? styles.victoryIcon : styles.defeatIcon]}>
             <Ionicons 
               name={battleResult.victory ? "trophy" : "skull"} 
-              size={Layout.scale(64)} 
+              size={Layout.scale(48)} 
               color={battleResult.victory ? Colors.accent : Colors.error} 
             />
           </View>
@@ -286,11 +279,11 @@ export default function BattleScreen() {
           
           <View style={styles.resultDetails}>
             <View style={styles.resultDetail}>
-              <Text style={styles.resultDetailLabel}>实际胜率</Text>
+              <Text style={styles.resultDetailLabel}>胜率</Text>
               <Text style={styles.resultDetailValue}>{Math.round(battleResult.victoryChance * 100)}%</Text>
             </View>
             <View style={styles.resultDetail}>
-              <Text style={styles.resultDetailLabel}>阵亡人数</Text>
+              <Text style={styles.resultDetailLabel}>阵亡</Text>
               <Text style={[styles.resultDetailValue, { color: Colors.error }]}>
                 -{battleResult.casualties}
               </Text>
@@ -304,7 +297,7 @@ export default function BattleScreen() {
                   style={styles.choiceButton}
                   onPress={() => handleResult('merge')}
                 >
-                  <Text style={styles.choiceButtonText}>合并部落</Text>
+                  <Text style={styles.choiceButtonText}>合并</Text>
                   <Text style={styles.choiceSubtext}>人口+50%</Text>
                 </TouchableOpacity>
                 
@@ -312,7 +305,7 @@ export default function BattleScreen() {
                   style={styles.choiceButton}
                   onPress={() => handleResult('vassal')}
                 >
-                  <Text style={styles.choiceButtonText}>收为附庸</Text>
+                  <Text style={styles.choiceButtonText}>附庸</Text>
                   <Text style={styles.choiceSubtext}>持续收益</Text>
                 </TouchableOpacity>
                 
@@ -330,7 +323,7 @@ export default function BattleScreen() {
                   style={styles.choiceButton}
                   onPress={() => handleResult('continue')}
                 >
-                  <Text style={styles.choiceButtonText}>继续探索</Text>
+                  <Text style={styles.choiceButtonText}>继续</Text>
                   <Text style={styles.choiceSubtext}>休养生息</Text>
                 </TouchableOpacity>
                 
@@ -338,7 +331,7 @@ export default function BattleScreen() {
                   style={[styles.choiceButton, styles.dangerButton]}
                   onPress={() => handleResult('end')}
                 >
-                  <Text style={styles.choiceButtonText}>结束本轮</Text>
+                  <Text style={styles.choiceButtonText}>结束</Text>
                   <Text style={styles.choiceSubtext}>保存实力</Text>
                 </TouchableOpacity>
               </>
@@ -346,6 +339,7 @@ export default function BattleScreen() {
           </View>
         </View>
       )}
+      </View>
     </ScalableView>
   );
 }
@@ -357,35 +351,28 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: Layout.padding,
-    paddingBottom: Layout.scale(100),
+    flex: 1,
   },
   titleContainer: {
     alignItems: 'center',
-    marginBottom: Layout.scale(32),
+    marginBottom: Layout.scale(20),
   },
   title: {
-    fontSize: Layout.fontScale(32),
+    fontSize: Layout.fontScale(24),
     fontWeight: 'bold',
     color: Colors.text,
     textAlign: 'center',
-  },
-  titleDecoration: {
-    width: Layout.scale(100),
-    height: Layout.scale(3),
-    backgroundColor: Colors.accent,
-    marginTop: Layout.scale(12),
-    borderRadius: Layout.borderRadiusSmall,
   },
   combatantsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: Layout.scale(32),
-    gap: Layout.scale(12),
+    marginBottom: Layout.scale(20),
+    gap: Layout.scale(8),
   },
   combatantBox: {
     backgroundColor: Colors.card,
-    padding: Layout.scale(20),
+    padding: Layout.scale(14),
     borderRadius: Layout.borderRadiusLarge,
     width: '42%',
     borderWidth: 2,
@@ -397,13 +384,13 @@ const styles = StyleSheet.create({
   },
   combatantHeader: {
     alignItems: 'center',
-    marginBottom: Layout.scale(16),
-    gap: Layout.scale(8),
+    marginBottom: Layout.scale(10),
+    gap: Layout.scale(6),
   },
   combatantIcon: {
-    width: Layout.scale(48),
-    height: Layout.scale(48),
-    borderRadius: Layout.scale(24),
+    width: Layout.scale(36),
+    height: Layout.scale(36),
+    borderRadius: Layout.scale(18),
     backgroundColor: Colors.primaryLight,
     justifyContent: 'center',
     alignItems: 'center',
@@ -416,14 +403,14 @@ const styles = StyleSheet.create({
   },
   combatantTitle: {
     color: Colors.text,
-    fontSize: Layout.fontScale(16),
+    fontSize: Layout.fontScale(12),
     fontWeight: 'bold',
     textAlign: 'center',
   },
   combatantStats: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    gap: Layout.scale(8),
+    gap: Layout.scale(6),
   },
   combatantStat: {
     alignItems: 'center',
@@ -431,13 +418,13 @@ const styles = StyleSheet.create({
   },
   combatantStatValue: {
     color: Colors.accent,
-    fontSize: Layout.fontScale(24),
+    fontSize: Layout.fontScale(18),
     fontWeight: 'bold',
   },
   combatantStatLabel: {
     color: Colors.textSecondary,
-    fontSize: Layout.fontScale(12),
-    marginTop: Layout.scale(4),
+    fontSize: Layout.fontScale(10),
+    marginTop: Layout.scale(2),
   },
   statDivider: {
     width: 1,
@@ -448,17 +435,17 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    width: Layout.scale(60),
+    width: Layout.scale(48),
   },
   vsLine: {
     width: Layout.scale(2),
-    height: Layout.scale(20),
+    height: Layout.scale(16),
     backgroundColor: Colors.border.subtle,
   },
   vsBadge: {
-    width: Layout.scale(48),
-    height: Layout.scale(48),
-    borderRadius: Layout.scale(24),
+    width: Layout.scale(40),
+    height: Layout.scale(40),
+    borderRadius: Layout.scale(20),
     backgroundColor: Colors.primaryDark,
     justifyContent: 'center',
     alignItems: 'center',
@@ -467,12 +454,12 @@ const styles = StyleSheet.create({
   },
   vsText: {
     color: Colors.accent,
-    fontSize: Layout.fontScale(18),
+    fontSize: Layout.fontScale(14),
     fontWeight: 'bold',
   },
   phaseContainer: {
     backgroundColor: Colors.card,
-    padding: Layout.scale(28),
+    padding: Layout.scale(20),
     borderRadius: Layout.borderRadiusLarge,
     alignItems: 'center',
     borderWidth: 1,
@@ -482,22 +469,22 @@ const styles = StyleSheet.create({
   chanceContainer: {
     width: '100%',
     alignItems: 'center',
-    marginBottom: Layout.scale(24),
+    marginBottom: Layout.scale(16),
   },
   chanceLabel: {
     color: Colors.textSecondary,
-    fontSize: Layout.fontScale(14),
-    marginBottom: Layout.scale(8),
+    fontSize: Layout.fontScale(12),
+    marginBottom: Layout.scale(6),
   },
   chanceValue: {
     color: Colors.accent,
-    fontSize: Layout.fontScale(48),
+    fontSize: Layout.fontScale(36),
     fontWeight: 'bold',
-    marginBottom: Layout.scale(12),
+    marginBottom: Layout.scale(8),
   },
   chanceBar: {
     width: '100%',
-    height: Layout.scale(8),
+    height: Layout.scale(6),
     backgroundColor: Colors.primaryDark,
     borderRadius: Layout.borderRadiusSmall,
     overflow: 'hidden',
@@ -509,7 +496,7 @@ const styles = StyleSheet.create({
   },
   buttonRow: {
     flexDirection: 'row',
-    gap: Layout.scale(16),
+    gap: Layout.scale(12),
     width: '100%',
   },
   battleButton: {
@@ -518,10 +505,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: Layout.scale(16),
-    paddingHorizontal: Layout.scale(20),
+    paddingVertical: Layout.scale(12),
+    paddingHorizontal: Layout.scale(16),
     borderRadius: Layout.borderRadius,
-    gap: Layout.scale(10),
+    gap: Layout.scale(6),
     borderWidth: 1,
     borderColor: Colors.border.subtle,
   },
@@ -530,51 +517,40 @@ const styles = StyleSheet.create({
     borderColor: Colors.accent,
     ...Colors.shadow.accent,
   },
-  buttonIcon: {
-    width: Layout.scale(28),
-    height: Layout.scale(28),
-    borderRadius: Layout.scale(14),
-    backgroundColor: Colors.primaryLight,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   battleButtonText: {
     color: Colors.text,
-    fontSize: Layout.fontScale(16),
+    fontSize: Layout.fontScale(14),
     fontWeight: 'bold',
   },
   primaryButtonText: {
     color: '#000',
   },
   fightingIconContainer: {
-    width: Layout.scale(120),
-    height: Layout.scale(120),
-    borderRadius: Layout.scale(60),
+    width: Layout.scale(80),
+    height: Layout.scale(80),
+    borderRadius: Layout.scale(40),
     backgroundColor: Colors.primaryLight,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: Layout.scale(20),
-    borderWidth: 3,
+    marginBottom: Layout.scale(12),
+    borderWidth: 2,
     borderColor: Colors.accent,
     ...Colors.shadow.glow,
   },
   fightingText: {
     color: Colors.accent,
-    fontSize: Layout.fontScale(28),
+    fontSize: Layout.fontScale(20),
     fontWeight: 'bold',
-    marginBottom: Layout.scale(20),
-  },
-  fightingAnimation: {
-    marginTop: Layout.scale(12),
+    marginBottom: Layout.scale(8),
   },
   resultIconContainer: {
-    width: Layout.scale(120),
-    height: Layout.scale(120),
-    borderRadius: Layout.scale(60),
+    width: Layout.scale(80),
+    height: Layout.scale(80),
+    borderRadius: Layout.scale(40),
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: Layout.scale(20),
-    borderWidth: 4,
+    marginBottom: Layout.scale(12),
+    borderWidth: 3,
     ...Colors.shadow.glow,
   },
   victoryIcon: {
@@ -587,46 +563,45 @@ const styles = StyleSheet.create({
   },
   victoryText: {
     color: Colors.success,
-    fontSize: Layout.fontScale(36),
+    fontSize: Layout.fontScale(28),
     fontWeight: 'bold',
-    marginBottom: Layout.scale(24),
+    marginBottom: Layout.scale(16),
   },
   defeatText: {
     color: Colors.error,
-    fontSize: Layout.fontScale(36),
+    fontSize: Layout.fontScale(28),
     fontWeight: 'bold',
-    marginBottom: Layout.scale(24),
+    marginBottom: Layout.scale(16),
   },
   resultDetails: {
     flexDirection: 'row',
-    gap: Layout.scale(24),
-    marginBottom: Layout.scale(24),
+    gap: Layout.scale(16),
+    marginBottom: Layout.scale(16),
   },
   resultDetail: {
     alignItems: 'center',
     backgroundColor: Colors.primaryDark,
-    paddingVertical: Layout.scale(12),
-    paddingHorizontal: Layout.scale(20),
+    paddingVertical: Layout.scale(10),
+    paddingHorizontal: Layout.scale(16),
     borderRadius: Layout.borderRadius,
   },
   resultDetailLabel: {
     color: Colors.textSecondary,
-    fontSize: Layout.fontScale(12),
-    marginBottom: Layout.scale(4),
+    fontSize: Layout.fontScale(10),
+    marginBottom: Layout.scale(2),
   },
   resultDetailValue: {
     color: Colors.accent,
-    fontSize: Layout.fontScale(20),
+    fontSize: Layout.fontScale(16),
     fontWeight: 'bold',
   },
   resultButtons: {
-    gap: Layout.scale(12),
+    gap: Layout.scale(10),
     width: '100%',
-    marginTop: Layout.scale(8),
   },
   choiceButton: {
     backgroundColor: Colors.primary,
-    padding: Layout.scale(18),
+    padding: Layout.scale(14),
     borderRadius: Layout.borderRadius,
     alignItems: 'center',
     borderWidth: 1,
@@ -638,13 +613,13 @@ const styles = StyleSheet.create({
   },
   choiceButtonText: {
     color: Colors.text,
-    fontSize: Layout.fontScale(18),
+    fontSize: Layout.fontScale(14),
     fontWeight: 'bold',
-    marginBottom: Layout.scale(4),
+    marginBottom: Layout.scale(2),
   },
   choiceSubtext: {
     color: Colors.textSecondary,
-    fontSize: Layout.fontScale(13),
+    fontSize: Layout.fontScale(11),
   },
   loadingText: {
     color: Colors.text,

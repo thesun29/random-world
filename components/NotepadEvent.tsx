@@ -243,12 +243,14 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: Colors.card,
     borderRadius: Layout.borderRadiusLarge,
-    padding: 14,
-    marginVertical: 10,
+    padding: Layout.scale(12),
+    marginVertical: Layout.scale(8),
+    marginHorizontal: Layout.scale(12),
     borderLeftWidth: 4,
     borderLeftColor: Colors.accent,
     borderWidth: 2,
     borderColor: Colors.border.subtle,
+    width: Layout.scale(320),
     ...Colors.shadow.card,
   },
   historyContainer: {

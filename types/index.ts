@@ -23,10 +23,14 @@ export interface TribeData {
   icon: string;
   population: number;
   strength: number;
-  status: 'unknown' | 'friendly' | 'neutral' | 'enemy' | 'defeated' | 'vassal';
+  status: 'unknown' | 'friendly' | 'neutral' | 'enemy' | 'defeated' | 'vassal' | 'merged';
   discovered?: boolean;
   vassals?: string[]; // 附庸部落的ID数组
   overlord?: string; // 宗主部落的ID
+  tier?: number; // 氏族层级，用于拓扑图显示
+  parentId?: string; // 父氏族ID
+  childrenIds?: string[]; // 子氏族ID数组
+  isMainClan?: boolean; // 是否为主氏族
 }
 
 export interface RunData {

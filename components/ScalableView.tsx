@@ -10,6 +10,7 @@ interface ScalableViewProps {
   scrollViewProps?: ScrollViewProps;
   contentContainerStyle?: ViewStyle;
   centered?: boolean;
+  disableSafeArea?: boolean;
 }
 
 export default function ScalableView({
@@ -19,6 +20,7 @@ export default function ScalableView({
   scrollViewProps,
   contentContainerStyle,
   centered = true,
+  disableSafeArea = false,
 }: ScalableViewProps) {
   const containerStyle = [
     styles.container,
@@ -31,6 +33,21 @@ export default function ScalableView({
   ];
 
   if (scrollable) {
+    if (disableSafeArea) {
+      return (
+        <View style={containerStyle}>
+          <ScrollView
+            style={styles.scrollView}
+            contentContainerStyle={scrollContentStyle}
+            showsVerticalScrollIndicator={false}
+            bounces={true}
+            {...scrollViewProps}
+          >
+            {children}
+          </ScrollView>
+        </View>
+      );
+    }
     return (
       <SafeAreaView style={containerStyle} edges={['top', 'bottom', 'left', 'right']}>
         <ScrollView
@@ -43,6 +60,16 @@ export default function ScalableView({
           {children}
         </ScrollView>
       </SafeAreaView>
+    );
+  }
+
+  if (disableSafeArea) {
+    return (
+      <View style={containerStyle}>
+        <View style={centered ? styles.contentCentered : styles.content}>
+          {children}
+        </View>
+      </View>
     );
   }
 

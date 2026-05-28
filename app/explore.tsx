@@ -144,67 +144,67 @@ export default function ExploreScreen() {
   const currentRace = getRaceById(currentRun.currentRace);
 
   return (
-    <ScalableView style={styles.container} scrollable scrollViewProps={{ ref: scrollViewRef }}>
-      {/* 顶部状态栏 */}
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <View style={styles.backButtonIcon}>
-            <GufengIcon name="arrow-back" size={Layout.scale(22)} />
+    <ScalableView style={styles.container} disableSafeArea={true}>
+      {/* 吸顶状态栏 - 更紧凑 */}
+      <View style={styles.stickyHeader}>
+        {/* 顶部状态栏 */}
+        <View style={styles.header}>
+          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+            <View style={styles.backButtonIcon}>
+              <GufengIcon name="arrow-back" size={Layout.scale(14)} />
+            </View>
+          </TouchableOpacity>
+          <View style={styles.headerCenter}>
+            <Text style={styles.title}>探索中</Text>
+            <View style={styles.raceStatusBadge}>
+              <GufengIcon name="people" size={Layout.scale(9)} />
+              <Text style={styles.raceStatus}>
+                {currentRace?.name || '未开化猿人'}
+              </Text>
+            </View>
           </View>
-        </TouchableOpacity>
-        <View style={styles.headerCenter}>
-          <Text style={styles.title}>探索中</Text>
-          <View style={styles.raceStatusBadge}>
-            <GufengIcon name="people" size={Layout.scale(14)} />
-            <Text style={styles.raceStatus}>
-              {currentRace?.name || '未开化猿人'}
-            </Text>
-          </View>
+          <View style={styles.placeholder} />
         </View>
-        <View style={styles.placeholder} />
-      </View>
 
-      {/* 进度条 */}
-      <View style={styles.progressSection}>
-        <ProgressBar progress={currentRun.progress ?? 0} showText={true} />
-      </View>
+        {/* 进度条 */}
+        <View style={styles.progressSection}>
+          <ProgressBar progress={currentRun.progress ?? 0} showText={true} />
+        </View>
 
-      {/* 资源显示 */}
-      <View style={styles.resourcesBar}>
-        {/* 人口 */}
-        <View key="population" style={styles.resourceItem}>
-          <View style={styles.resourceIconContainer}>
-            <GufengIcon name="people" size={Layout.scale(20)} />
+        {/* 资源显示 - 更紧凑 */}
+        <View style={styles.resourcesBar}>
+          {/* 人口 */}
+          <View key="population" style={styles.resourceItem}>
+            <GufengIcon name="people" size={Layout.scale(11)} />
+            <Text style={styles.resourceValue}>{currentRun.population ?? 0}</Text>
           </View>
-          <Text style={styles.resourceValue}>{currentRun.population ?? 0}</Text>
-          <Text style={styles.resourceKey}>人口</Text>
-        </View>
-        {/* 战力 */}
-        <View key="strength" style={styles.resourceItem}>
-          <View style={styles.resourceIconContainer}>
-            <GufengIcon name="shield" size={Layout.scale(20)} />
+          {/* 战力 */}
+          <View key="strength" style={styles.resourceItem}>
+            <GufengIcon name="shield" size={Layout.scale(11)} />
+            <Text style={styles.resourceValue}>{currentRun.totalStrength ?? 0}</Text>
           </View>
-          <Text style={styles.resourceValue}>{currentRun.totalStrength ?? 0}</Text>
-          <Text style={styles.resourceKey}>战力</Text>
-        </View>
-        {Object.entries(currentRun.inventory ?? {}).map(([key, value]) => (
-          <View key={key} style={styles.resourceItem}>
-            <View style={styles.resourceIconContainer}>
+          {Object.entries(currentRun.inventory ?? {}).map(([key, value]) => (
+            <View key={key} style={styles.resourceItem}>
               <GufengIcon 
                 name={key === 'food' ? 'food' : key === 'water' ? 'water' : key === 'wood' ? 'wood' : 'stone'} 
-                size={Layout.scale(20)} 
+                size={Layout.scale(11)} 
               />
+              <Text style={styles.resourceValue}>
+                {typeof value === 'number' ? value : '✓'}
+              </Text>
             </View>
-            <Text style={styles.resourceValue}>
-              {typeof value === 'number' ? value : '✓'}
-            </Text>
-            <Text style={styles.resourceKey}>{key}</Text>
-          </View>
-        ))}
+          ))}
+        </View>
       </View>
 
       {/* 记事本内容区域 */}
-      <View style={styles.notepad}>
+      <ScrollView 
+        style={styles.notepadScrollView} 
+        ref={scrollViewRef}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.notepadScrollContent}
+      >
+        <View style={styles.notepad}>
         {/* 开始标记 */}
         <View style={styles.startMarker}>
           <View style={styles.startMarkerIcon}>
@@ -239,7 +239,7 @@ export default function ExploreScreen() {
             {currentRun?.population <= 0 ? (
               <>
                 <View style={styles.completeIconContainer}>
-                  <GufengIcon name="skull" size={Layout.scale(58)} />
+                  <GufengIcon name="skull" size={Layout.scale(40)} />
                 </View>
                 <Text style={[styles.completeTitle, { color: Colors.error }]}>族群灭亡！</Text>
                 <Text style={styles.completeSubtitle}>所有族人都已死亡...</Text>
@@ -247,7 +247,7 @@ export default function ExploreScreen() {
             ) : (
               <>
                 <View style={styles.completeIconContainer}>
-                  <GufengIcon name="trophy" size={Layout.scale(58)} />
+                  <GufengIcon name="trophy" size={Layout.scale(40)} />
                 </View>
                 <Text style={styles.completeTitle}>探索完成！</Text>
                 <Text style={styles.completeSubtitle}>恭喜你完成了本次探索</Text>
@@ -255,14 +255,15 @@ export default function ExploreScreen() {
             )}
             <TouchableOpacity style={styles.completeButton} onPress={handleComplete}>
               <Text style={styles.completeButtonText}>查看结果</Text>
-              <GufengIcon name="arrow-forward" size={Layout.scale(22)} />
+              <GufengIcon name="arrow-forward" size={Layout.scale(16)} />
             </TouchableOpacity>
           </View>
         )}
 
         {/* 底部留白 */}
         <View style={styles.bottomPadding} />
-      </View>
+        </View>
+      </ScrollView>
     </ScalableView>
   );
 }
@@ -272,92 +273,103 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
+  stickyHeader: {
+    backgroundColor: Colors.backgroundLight,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.accent,
+    zIndex: 10,
+    paddingHorizontal: Layout.scale(16),
+    paddingTop: Layout.scale(24),
+    paddingBottom: Layout.scale(8),
+    marginHorizontal: -Layout.scale(24),
+    marginTop: -Layout.scale(24),
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: Layout.padding,
-    paddingTop: Layout.scale(12),
-    paddingBottom: Layout.scale(12),
-    backgroundColor: Colors.backgroundLight,
-    borderBottomWidth: 2,
-    borderBottomColor: Colors.accent,
+    paddingHorizontal: 0,
+    paddingTop: 0,
+    paddingBottom: 0,
   },
   backButton: {
-    padding: Layout.scale(4),
+    padding: Layout.scale(1),
   },
   backButtonIcon: {
-    width: Layout.scale(44),
-    height: Layout.scale(44),
-    borderRadius: Layout.borderRadius,
+    width: Layout.scale(26),
+    height: Layout.scale(26),
+    borderRadius: Layout.borderRadiusSmall,
     backgroundColor: Colors.card,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: Colors.border.subtle,
-    ...Colors.shadow.card,
   },
   headerCenter: {
     alignItems: 'center',
-    gap: Layout.scale(6),
+    gap: Layout.scale(2),
   },
   title: {
     color: Colors.accent,
-    fontSize: Layout.fontScale(24),
+    fontSize: Layout.fontScale(14),
     fontWeight: 'bold',
   },
   raceStatusBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.card,
-    paddingHorizontal: Layout.scale(12),
-    paddingVertical: Layout.scale(6),
-    borderRadius: Layout.borderRadius,
-    gap: Layout.scale(6),
+    paddingHorizontal: Layout.scale(6),
+    paddingVertical: Layout.scale(2),
+    borderRadius: Layout.borderRadiusSmall,
+    gap: Layout.scale(3),
     borderWidth: 1,
     borderColor: Colors.border.subtle,
   },
   raceStatus: {
     color: Colors.accent,
-    fontSize: Layout.fontScale(12),
+    fontSize: Layout.fontScale(9),
     fontWeight: '600',
   },
   placeholder: {
-    width: Layout.scale(44),
+    width: Layout.scale(26),
   },
   progressSection: {
-    paddingHorizontal: Layout.padding,
-    paddingTop: Layout.scale(12),
-    marginBottom: Layout.scale(16),
+    paddingHorizontal: Layout.scale(8),
+    paddingTop: 0,
+    paddingBottom: 0,
   },
   resourcesBar: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    paddingHorizontal: Layout.padding,
-    gap: Layout.scale(10),
-    marginBottom: Layout.scale(16),
-  },
-  resourceItem: {
-    alignItems: 'center',
-    backgroundColor: Colors.card,
-    paddingHorizontal: Layout.scale(16),
-    paddingVertical: Layout.scale(10),
-    borderRadius: Layout.borderRadius,
-    borderWidth: 2,
-    borderColor: Colors.border.subtle,
+    flexWrap: 'nowrap',
+    paddingHorizontal: Layout.scale(8),
+    paddingBottom: 0,
     gap: Layout.scale(6),
   },
-  resourceIconContainer: {
-    marginBottom: Layout.scale(2),
+  resourceItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.card,
+    paddingHorizontal: Layout.scale(8),
+    paddingVertical: Layout.scale(4),
+    borderRadius: Layout.borderRadiusSmall,
+    borderWidth: 1,
+    borderColor: Colors.border.subtle,
+    gap: Layout.scale(3),
   },
   resourceValue: {
     color: Colors.accent,
-    fontSize: Layout.fontScale(18),
+    fontSize: Layout.fontScale(11),
     fontWeight: 'bold',
   },
   resourceKey: {
     color: Colors.textSecondary,
-    fontSize: Layout.fontScale(11),
+    fontSize: Layout.fontScale(9),
+  },
+  notepadScrollView: {
+    flex: 1,
+  },
+  notepadScrollContent: {
+    paddingRight: Layout.scale(8),
   },
   notepad: {
     flex: 1,
@@ -370,38 +382,38 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: Layout.scale(28),
-    gap: Layout.scale(16),
+    paddingVertical: Layout.scale(20),
+    gap: Layout.scale(12),
   },
   startMarkerIcon: {
-    width: Layout.scale(52),
-    height: Layout.scale(52),
+    width: Layout.scale(40),
+    height: Layout.scale(40),
     borderRadius: Layout.borderRadius,
     backgroundColor: Colors.backgroundLight,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 3,
+    borderWidth: 2,
     borderColor: Colors.accent,
   },
   startText: {
     color: Colors.textSecondary,
-    fontSize: Layout.fontScale(18),
+    fontSize: Layout.fontScale(16),
     fontWeight: '600',
   },
   startMarkerLine: {
-    width: Layout.scale(48),
+    width: Layout.scale(36),
     height: Layout.scale(2),
     backgroundColor: Colors.border.subtle,
   },
   completeSection: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: Layout.scale(56),
-    gap: Layout.scale(24),
+    paddingVertical: Layout.scale(24),
+    gap: Layout.scale(16),
   },
   completeIconContainer: {
-    width: Layout.scale(108),
-    height: Layout.scale(108),
+    width: Layout.scale(80),
+    height: Layout.scale(80),
     borderRadius: Layout.borderRadiusLarge,
     backgroundColor: Colors.card,
     justifyContent: 'center',
@@ -412,31 +424,32 @@ const styles = StyleSheet.create({
   },
   completeTitle: {
     color: Colors.accent,
-    fontSize: Layout.fontScale(30),
+    fontSize: Layout.fontScale(22),
     fontWeight: 'bold',
+    textAlign: 'center',
   },
   completeSubtitle: {
     color: Colors.textMuted,
-    fontSize: Layout.fontScale(16),
-    marginTop: Layout.scale(8),
+    fontSize: Layout.fontScale(14),
+    textAlign: 'center',
   },
   completeButton: {
     flexDirection: 'row',
     backgroundColor: Colors.accent,
-    paddingVertical: Layout.scale(18),
-    paddingHorizontal: Layout.scale(36),
+    paddingVertical: Layout.scale(14),
+    paddingHorizontal: Layout.scale(28),
     borderRadius: Layout.borderRadiusLarge,
     alignItems: 'center',
-    gap: Layout.scale(10),
-    marginTop: Layout.scale(16),
+    gap: Layout.scale(8),
+    marginTop: Layout.scale(12),
     ...Colors.shadow.accent,
   },
   completeButtonText: {
     color: Colors.primaryDark,
-    fontSize: Layout.fontScale(18),
+    fontSize: Layout.fontScale(16),
     fontWeight: 'bold',
   },
   bottomPadding: {
-    height: Layout.scale(48),
+    height: Layout.scale(24),
   },
 });

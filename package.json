@@ -7,6 +7,7 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
+    "web-dev": "cross-env CI=false expo start --web",
     "test": "jest --watchAll",
     "lint": "expo lint",
     "restart-server": "node .trae/scripts/restart-server.js",

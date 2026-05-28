@@ -202,10 +202,12 @@ function startServer() {
   return new Promise((resolve, reject) => {
     console.log('正在启动游戏服务器...');
     
+    const env = { ...process.env, CI: 'false' };
     const server = spawn('npm', ['start'], {
       cwd: path.join(__dirname, '../../'),
       shell: true,
-      detached: false
+      detached: false,
+      env: env
     });
     
     let started = false;

@@ -7,6 +7,7 @@ import Layout from '@/constants/Layout';
 import ScalableView from '@/components/ScalableView';
 import GufengIcon from '@/components/GufengIcons';
 import { getRaceById, RACES } from '@/utils/races';
+import ClanTopologyChart from '@/components/ClanTopologyChart';
 
 // 左侧系统菜单
 const leftMenuItems = [
@@ -32,6 +33,7 @@ export default function HomeScreen() {
   const { player, loadSavedPlayer } = useGameStore();
   const [showPopulationModal, setShowPopulationModal] = useState(false);
   const [showStrengthModal, setShowStrengthModal] = useState(false);
+  const [showClanTopologyModal, setShowClanTopologyModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedMenu, setSelectedMenu] = useState<string | null>(null);
   const [showSubMenu, setShowSubMenu] = useState(false);
@@ -62,7 +64,7 @@ export default function HomeScreen() {
     if (itemId === 'explore') {
       handleStartExploration();
     } else if (itemId === 'race' && player) {
-      router.push(`/race/${player.worldData.unlockedRaces[player.worldData.unlockedRaces.length - 1]}`);
+      setShowClanTopologyModal(true);
     }
   };
 
@@ -409,6 +411,53 @@ export default function HomeScreen() {
                   </View>
                 );
               })}
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
+      {/* 氏族拓扑图模态框 */}
+      <Modal
+        visible={showClanTopologyModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowClanTopologyModal(false)}
+      >
+        <Pressable style={styles.clanModalOverlay} onPress={() => setShowClanTopologyModal(false)}>
+          <Pressable style={styles.clanModalContent} onPress={() => {}}>
+            <View style={styles.clanModalHeader}>
+              <Text style={styles.clanModalTitle}>氏族关系</Text>
+              <TouchableOpacity onPress={() => setShowClanTopologyModal(false)}>
+                <Text style={{ fontSize: Layout.scale(24), color: Colors.text, fontWeight: 'bold' }}>×</Text>
+              </TouchableOpacity>
+            </View>
+            <ScrollView 
+              style={styles.clanModalScroll} 
+              contentContainerStyle={styles.clanModalScrollContent}
+              horizontal={true}
+              showsHorizontalScrollIndicator={true}
+              showsVerticalScrollIndicator={true}
+            >
+              <ScrollView 
+                contentContainerStyle={styles.clanModalVerticalScrollContent}
+                showsVerticalScrollIndicator={true}
+                nestedScrollEnabled={true}
+              >
+                <ClanTopologyChart tribes={player?.worldData.unlockedTribes || []} />
+              </ScrollView>
+            </ScrollView>
+            <View style={styles.clanModalFooter}>
+              <TouchableOpacity 
+                style={styles.clanModalButton}
+                onPress={() => {
+                  setShowClanTopologyModal(false);
+                  if (player) {
+                    router.push(`/race/${player.worldData.unlockedRaces[player.worldData.unlockedRaces.length - 1]}`);
+                  }
+                }}
+              >
+                <Text style={styles.clanModalButtonText}>查看种族详情</Text>
+              </TouchableOpacity>
             </View>
           </Pressable>
         </Pressable>
@@ -831,6 +880,67 @@ const styles = StyleSheet.create({
   },
   tribesSectionTitle: {
     color: Colors.accent,
+    fontSize: Layout.scale(14),
+    fontWeight: 'bold',
+  },
+  clanModalOverlay: {
+    flex: 1,
+    backgroundColor: Colors.overlay.medium,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: Layout.scale(8),
+  },
+  clanModalContent: {
+    backgroundColor: Colors.card,
+    borderRadius: Layout.borderRadiusLarge,
+    width: '100%',
+    maxWidth: Layout.scale(700),
+    maxHeight: '90%',
+    borderWidth: 3,
+    borderColor: Colors.accent,
+    shadowColor: Colors.accent,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+  },
+  clanModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: Layout.scale(16),
+    paddingBottom: Layout.scale(8),
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border.subtle,
+  },
+  clanModalTitle: {
+    color: Colors.accent,
+    fontSize: Layout.scale(20),
+    fontWeight: 'bold',
+  },
+  clanModalScroll: {
+    flex: 1,
+    maxHeight: Layout.scale(550),
+  },
+  clanModalScrollContent: {
+    flexGrow: 1,
+  },
+  clanModalVerticalScrollContent: {
+    flexGrow: 1,
+  },
+  clanModalFooter: {
+    padding: Layout.scale(12),
+    borderTopWidth: 1,
+    borderTopColor: Colors.border.subtle,
+    alignItems: 'center',
+  },
+  clanModalButton: {
+    backgroundColor: Colors.accent,
+    paddingHorizontal: Layout.scale(24),
+    paddingVertical: Layout.scale(12),
+    borderRadius: Layout.borderRadius,
+  },
+  clanModalButtonText: {
+    color: Colors.primaryDark,
     fontSize: Layout.scale(14),
     fontWeight: 'bold',
   },
